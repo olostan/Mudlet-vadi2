@@ -2,6 +2,7 @@
 #define TROOM_H
 
 #include <QVector3D>
+#include <QMap>
 
 #define DIR_NORTH 1
 #define DIR_NORTHEAST 2
@@ -10,7 +11,7 @@
 #define DIR_WEST 5
 #define DIR_SOUTH 6
 #define DIR_SOUTHEAST 7
-#define DIR_SOUTWEST 8
+#define DIR_SOUTHWEST 8
 #define DIR_UP 9
 #define DIR_DOWN 10
 #define DIR_IN 11
@@ -22,6 +23,12 @@ public:
     TRoom();
     bool hasExit( int );
     void setWeight( int );
+    void setExitLock( int, bool );
+    void setSpecialExitLock(int to, QString cmd, bool doLock);
+    bool hasExitLock(int to);
+    bool hasSpecialExitLock( int, QString );
+    void removeSpecialExit( int to, QString cmd );
+    void addSpecialExit( int to, QString cmd );
     int id;
     int area;
     int x;
@@ -42,12 +49,17 @@ public:
     int environment;
     int weight;
     bool isLocked;
-    float xRot;
-    float yRot;
-    float zRot;
-    float zoom;
+//    float xRot;
+//    float yRot;
+//    float zRot;
+//    float zoom;
+    qint8 c;
     QString name;
     QVector3D v;
+    QMultiMap<int, QString> other; // es können mehrere exits zum gleichen raum verlaufen
+                                   //verbotene exits werden mit 0 geprefixed, offene mit 1
+    QMap<QString, QString> userData;
+    QList<int> exitLocks;
 };
 
 #endif // TROOM_H

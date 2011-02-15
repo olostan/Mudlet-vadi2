@@ -115,6 +115,7 @@ bool XMLexport::writeHost( Host * pT )
     writeAttribute( "mFORCE_GA_OFF", pT->mFORCE_GA_OFF ? "yes" : "no" );
     writeAttribute( "mFORCE_SAVE_ON_EXIT", pT->mFORCE_SAVE_ON_EXIT ? "yes" : "no" );
     writeAttribute( "mEnableGMCP", pT->mEnableGMCP ? "yes" : "no" );
+    writeAttribute( "mMapStrongHighlight", pT->mMapStrongHighlight ? "yes" : "no" );
 
     writeTextElement( "name", pT->mHostName );
     //writeTextElement( "login", pT->mLogin );
@@ -153,6 +154,24 @@ bool XMLexport::writeHost( Host * pT )
     writeTextElement( "mCommandSeparator", pT->mCommandSeparator );
     writeTextElement( "commandLineMinimumHeight", QString::number(pT->commandLineMinimumHeight) );
 
+    writeTextElement( "mFgColor2", pT->mFgColor_2.name() );
+    writeTextElement( "mBgColor2", pT->mBgColor_2.name() );
+    writeTextElement( "mBlack2", pT->mBlack_2.name() );
+    writeTextElement( "mLightBlack2", pT->mLightBlack_2.name() );
+    writeTextElement( "mRed2", pT->mRed_2.name() );
+    writeTextElement( "mLightRed2", pT->mLightRed_2.name() );
+    writeTextElement( "mBlue2", pT->mBlue_2.name() );
+    writeTextElement( "mLightBlue2", pT->mLightBlue_2.name() );
+    writeTextElement( "mGreen2", pT->mGreen_2.name() );
+    writeTextElement( "mLightGreen2", pT->mLightGreen_2.name() );
+    writeTextElement( "mYellow2", pT->mYellow_2.name() );
+    writeTextElement( "mLightYellow2", pT->mLightYellow_2.name() );
+    writeTextElement( "mCyan2", pT->mCyan_2.name() );
+    writeTextElement( "mLightCyan2", pT->mLightCyan_2.name() );
+    writeTextElement( "mMagenta2", pT->mMagenta_2.name() );
+    writeTextElement( "mLightMagenta2", pT->mLightMagenta_2.name() );
+    writeTextElement( "mWhite2", pT->mWhite_2.name() );
+    writeTextElement( "mLightWhite2", pT->mLightWhite_2.name() );
 
     writeEndElement(); // end Host tag
     writeEndElement(); // end HostPackage tag

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2009 by Heiko Koehn   *
- *   KoehnHeiko@googlemail.com   *
+ *   Copyright (C) 2008-2011 by Heiko Koehn  KoehnHeiko@googlemail.com     *
+ *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -90,20 +90,22 @@ public:
     void              setConsoleFgColor( int r, int g, int b ){mFgColor = QColor(r,g,b);}
     void              setConsoleBgColor( int r, int g, int b ){mBgColor = QColor(r,g,b);}
     void              setIsMiniConsole(){ mIsMiniConsole = true; }
-    bool              mShowTimeStamps;
-    int               mScrollVector;
+    void              copySelectionToClipboardHTML();
+
+    QColor            mBgColor;
     int               mCursorY;
-    bool              mIsTailMode;
     QFont             mDisplayFont;
+    QColor            mFgColor;
     int               mFontAscent;
     int               mFontDescent;
+    bool              mIsCommandPopup;
+    bool              mIsTailMode;
+    QMap<QString, QString> mPopupCommands;
+    int               mScrollVector;
+    QRegion           mSelectedRegion;
+    bool              mShowTimeStamps;
     int               mWrapAt;
     int               mWrapIndentCount;
-    QRegion           mSelectedRegion;
-    QColor            mFgColor;
-    QColor            mBgColor;
-    bool              mIsCommandPopup;
-    QMap<QString, QString> mPopupCommands;
 
 signals:
 
@@ -113,51 +115,44 @@ public slots:
     void              slot_copySelectionToClipboard();
     void              slot_scrollBarMoved( int );
     void              slot_popupMenu();
-
-
+    void              slot_copySelectionToClipboardHTML();
 
 private:
 
-    bool              mForceUpdate;
     void              initDefaultSettings();
-    bool              mScrollUp;
-
 
     QFont             mCommandLineFont;
     QFont             mCommandSeperator;
-
-    bool              mIsDebugConsole;
-
-    int               mLeftMargin;
-    int               mTopMargin;
-    int               mScreenHeight;
-    int               mScreenWidth;
     int               mFontHeight;
     int               mFontWidth;
-    Host *            mpHost;
-    TBuffer *         mpBuffer;
-    TConsole *        mpConsole;
-
-
+    bool              mForceUpdate;
     bool              mHighlight_on;
     bool              mHighlightingBegin;
     bool              mHighlightingEnd;
-    bool              mMouseTracking;
-    bool              mIsSplitScreen;
-    bool              mInversOn;
-    QPoint            mPA;
-    QPoint            mPB;
-    QPoint            mP_aussen;
-
-
-    bool              mPainterInit;
-    QPixmap           mScreenMap;
-    QScrollBar *      mpScrollBar;
-    int               mOldScrollPos;
     bool              mInit_OK;
+    bool              mInversOn;
+    bool              mIsDebugConsole;
     bool              mIsMiniConsole;
+    bool              mIsSplitScreen;
     int               mLastRenderBottom;
+    int               mLeftMargin;
+    bool              mMouseTracking;
+    int               mOldScrollPos;
+    QPoint            mP_aussen;
+    QPoint            mPA;
+    bool              mPainterInit;
+    QPoint            mPB;
+    TBuffer *         mpBuffer;
+    TConsole *        mpConsole;
+    Host *            mpHost;
+    QScrollBar *      mpScrollBar;
+    int               mScreenHeight;
+    QPixmap           mScreenMap;
+    int               mScreenWidth;
+    bool              mScrollUp;
+    int               mTopMargin;
     bool              mUpdateSlice;
+
 };
 
 #endif

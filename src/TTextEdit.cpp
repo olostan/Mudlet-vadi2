@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Heiko Koehn (KoehnHeiko@googlemail.com)    *
+ *   Copyright (C) 2008-2011 by Heiko Koehn  KoehnHeiko@googlemail.com     *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -33,26 +33,27 @@
 
 TTextEdit::TTextEdit( TConsole * pC, QWidget * pW, TBuffer * pB, Host * pH, bool isDebugConsole, bool isSplitScreen )
 : QWidget( pW )
-, mpBuffer( pB )
-, mpHost( pH )
-, mpConsole( pC )
 , mCursorY( 0 )
+, mIsCommandPopup( false )
 , mIsTailMode( true )
+, mShowTimeStamps( isDebugConsole )
+//private
+, mForceUpdate( false )
 , mHighlight_on( false )
 , mHighlightingBegin( false )
 , mHighlightingEnd( false )
-, mMouseTracking( false )
-, mIsSplitScreen( isSplitScreen )
-, mIsDebugConsole( isDebugConsole )
-, mInversOn( false )
-, mPainterInit( false )
-, mpScrollBar( 0 )
 , mInit_OK( false )
-, mShowTimeStamps( isDebugConsole )
-, mForceUpdate( false )
+, mInversOn( false )
+, mIsDebugConsole( isDebugConsole )
 , mIsMiniConsole( false )
+, mIsSplitScreen( isSplitScreen )
 , mLastRenderBottom( 0 )
-, mIsCommandPopup( false )
+, mMouseTracking( false )
+, mPainterInit( false )
+, mpBuffer( pB )
+, mpConsole( pC )
+, mpHost( pH )
+, mpScrollBar( 0 )
 {
     if( ! mIsDebugConsole )
     {
@@ -391,16 +392,12 @@ void TTextEdit::drawFrame( QPainter & p, const QRect & rect )
     QPoint P_topLeft  = rect.topLeft();
     QPoint P_bottomRight = rect.bottomRight();
     int x_topLeft = P_topLeft.x();
-    int y_topLeft = P_topLeft.y();
     int x_bottomRight = P_bottomRight.x();
-    int y_bottomRight = P_bottomRight.y();
 
     if( x_bottomRight > mScreenWidth * mFontWidth ) x_bottomRight = mScreenWidth * mFontWidth;
 
     int x1 = x_topLeft / mFontWidth;
-    int y1 = y_topLeft / mFontHeight;
     int x2 = x_bottomRight / mFontWidth;
-    int y2 = y_bottomRight / mFontHeight;
 
     int lineOffset = imageTopLine();
     bool invers = false;
@@ -413,7 +410,7 @@ void TTextEdit::drawFrame( QPainter & p, const QRect & rect )
     int from = 0;
     for( int i=from; i<mScreenHeight; i++ )
     {
-        if( mpBuffer->buffer.size() <= i+lineOffset )
+        if( static_cast<int>(mpBuffer->buffer.size()) <= i+lineOffset )
         {
             break;
         }
@@ -551,8 +548,8 @@ void TTextEdit::drawForeground( QPainter & painter, const QRect & r )
     int y2 = y_bottomRight / mFontHeight;
 
     int lineOffset = imageTopLine();
-    bool invers = false;
-    int _c = 0;
+    //bool invers = false;
+    //int _c = 0;
     int from = 0;
     if( lineOffset == 0 )
     {
@@ -623,7 +620,7 @@ void TTextEdit::drawForeground( QPainter & painter, const QRect & r )
     drawBackground( p, deleteRect, mBgColor );//QColor(rand()%255,rand()%255,rand()%255));//mBgColor );
     for( int i=from; i<=y2; i++ )
     {
-        if( mpBuffer->buffer.size() <= i+lineOffset )
+        if( static_cast<int>(mpBuffer->buffer.size()) <= i+lineOffset )
         {
             break;
         }
@@ -634,11 +631,11 @@ void TTextEdit::drawForeground( QPainter & painter, const QRect & r )
             timeOffset = 13;
         }
         int lineLength = mpBuffer->buffer[i+lineOffset].size() + timeOffset;
-        int doubleByteOffset = 0;
+        //int doubleByteOffset = 0;
         for( int i2=x1; i2<lineLength; )
         {
             QString text;
-            bool doubleByte = false;
+            //bool doubleByte = false;
             if( i2 < timeOffset )
             {
                 text = mpBuffer->timeBuffer[i+lineOffset];
@@ -748,7 +745,6 @@ void TTextEdit::drawForeground( QPainter & painter, const QRect & r )
 void TTextEdit::paintEvent( QPaintEvent* e )
 {
     const QRect & rect = e->rect();
-    //qDebug()<<"\nconsole="<<mpConsole->mConsoleName<<" rect="<<e->rect()<<" screenheight="<<mScreenHeight<<"screenWidth="<<mScreenWidth<<" forceUpdate="<<mForceUpdate<<" mScrollUp="<<mScrollUp<<" bufferSize="<<mpBuffer->size()<<" update rect="<<e->rect()<<"\n";
 
     if( mScreenHeight <= 0 || mScreenWidth <= 0 )
     {
@@ -826,7 +822,7 @@ void TTextEdit::highlight()
                 break;
             }
             mpBuffer->dirty[y] = true;
-            if( x < mpBuffer->buffer[y].size() )
+            if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
             {
                 mpBuffer->buffer[y][x].invers = true;
             }
@@ -861,12 +857,12 @@ void TTextEdit::unHighlight( QRegion & region )
             {
                 break;
             }
-            if( y >= mpBuffer->buffer.size() )
+            if( y >= static_cast<int>(mpBuffer->buffer.size()) )
             {
                 break;
             }
             mpBuffer->dirty[y] = true;
-            if( x < mpBuffer->buffer[y].size() )
+            if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
             {
                 mpBuffer->buffer[y][x].invers = false;
                 mpBuffer->dirty[y] = true;
@@ -892,13 +888,15 @@ void TTextEdit::swap( QPoint & p1, QPoint & p2 )
 
 void TTextEdit::mouseMoveEvent( QMouseEvent * event )
 {
-    if( mFontWidth == 0 | mFontHeight == 0 ) return;
-    int x = event->x() / mFontWidth;
+    if( (mFontWidth == 0) | (mFontHeight == 0) ) return;
+    int x = event->x() / mFontWidth - 1;
     int y = ( event->y() / mFontHeight ) + imageTopLine();
-    if( x < 0 || y < 0 ) return;
-    if( y < mpBuffer->buffer.size() )
+    //qDebug()<<"Mouse: x()="<<event->x()<<" y()="<<event->y()<< "x="<<x<<" y="<<y;
+    if( x < 0 ) x = 0;
+    if( y < 0 ) y = 0;
+    if( y < static_cast<int>(mpBuffer->buffer.size()) )
     {
-        if( x < mpBuffer->buffer[y].size() )
+        if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
         {
             if( mpBuffer->buffer[y][x].link > 0 )
             {
@@ -916,6 +914,15 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
 
     if( ! mMouseTracking ) return;
 
+    if( event->y() < 10 )
+    {
+        mpConsole->scrollUp( 3 );
+    }
+    if( event->y() > height()-10 )
+    {
+        mpConsole->scrollDown( 3 );
+    }
+
     //int x, y;
     int timeOffset = 0;
     y = ( event->y() / mFontHeight ) + imageTopLine();
@@ -927,7 +934,11 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
         }
     }
     x = ( event->x() / mFontWidth ) - timeOffset;
-    if( ( x < 0 ) || ( y < 0 ) || ( y > (int) mpBuffer->size()-1 ) ) return;
+    if( ( x < 0 ) || ( y < 0 ) || ( y > (int) mpBuffer->size()-1 ) )
+    {
+        qDebug()<<"Mouse SELECT: ERROR#1";
+        return;
+    }
 
     QPoint PC( x, y );
 
@@ -948,10 +959,14 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
             int y1 = PC.y();
             for( int y=y1; y>=mPA.y(); y-- )
             {
+                if( y >= static_cast<int>(mpBuffer->buffer.size()) || y < 0 ) break;
                 int x = mpBuffer->buffer[y].size()-1;
                 if( y == y1 )
                 {
                     x = PC.x();
+                    if( x >= mpBuffer->buffer[y].size() )
+                        x = mpBuffer->buffer[y].size()-1;
+                    if( x < 0 ) x = 0;
                 }
                 mpBuffer->dirty[y] = true;
                 for( ; ; x-- )
@@ -960,7 +975,8 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
                     {
                         break;
                     }
-                    if( x < mpBuffer->buffer[y].size() )
+
+                    if( x < static_cast<int>(mpBuffer->buffer[y].size()) && x >= 0 )
                     {
                         mpBuffer->buffer[y][x].invers = false;
                     }
@@ -988,6 +1004,7 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
                 {
                     x = PC.x();
                 }
+                if( y >= static_cast<int>(mpBuffer->buffer.size()) || y < 0 ) break;
                 mpBuffer->dirty[y] = true;
                 for( ; ; x++ )
                 {
@@ -995,7 +1012,7 @@ void TTextEdit::mouseMoveEvent( QMouseEvent * event )
                     {
                         break;
                     }
-                    if( x < mpBuffer->buffer[y].size() )
+                    if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
                     {
                         mpBuffer->buffer[y][x].invers = false;
                     }
@@ -1028,9 +1045,9 @@ void TTextEdit::contextMenuEvent ( QContextMenuEvent * event )
 {
     int x = event->x() / mFontWidth;
     int y = ( event->y() / mFontHeight ) + imageTopLine();
-    if( y < mpBuffer->buffer.size() )
+    if( y < static_cast<int>(mpBuffer->buffer.size()) )
     {
-        if( x < mpBuffer->buffer[y].size() )
+        if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
         {
             if( mpBuffer->buffer[y][x].link > 0 )
             {
@@ -1066,8 +1083,12 @@ void TTextEdit::contextMenuEvent ( QContextMenuEvent * event )
     QAction * action = new QAction("copy", this );
     action->setStatusTip(tr("copy selected text to clipboard"));
     connect( action, SIGNAL(triggered()), this, SLOT(slot_copySelectionToClipboard()));
+    QAction * action2 = new QAction("copy as HTML", this );
+    action->setStatusTip(tr("copy selected text in HTML format with colors for usage in web browsers"));
+    connect( action2, SIGNAL(triggered()), this, SLOT(slot_copySelectionToClipboardHTML()));
     QMenu * popup = new QMenu( this );
     popup->addAction( action );
+    popup->addAction( action2 );
     popup->popup( mapToGlobal( event->pos() ), action );
     event->accept();
     return;
@@ -1121,9 +1142,9 @@ void TTextEdit::mousePressEvent( QMouseEvent * event )
     {
         int x = event->x() / mFontWidth;
         int y = ( event->y() / mFontHeight ) + imageTopLine();
-        if( y < mpBuffer->buffer.size() )
+        if( y < static_cast<int>(mpBuffer->buffer.size()) )
         {
-            if( x < mpBuffer->buffer[y].size() )
+            if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
             {
                 if( mpBuffer->buffer[y][x].link > 0 )
                 {
@@ -1155,9 +1176,9 @@ void TTextEdit::mousePressEvent( QMouseEvent * event )
     {
         int x = event->x() / mFontWidth;
         int y = ( event->y() / mFontHeight ) + imageTopLine();
-        if( y < mpBuffer->buffer.size() )
+        if( y < static_cast<int>(mpBuffer->buffer.size()) )
         {
-            if( x < mpBuffer->buffer[y].size() )
+            if( x < static_cast<int>(mpBuffer->buffer[y].size()) )
             {
                 if( mpBuffer->buffer[y][x].link > 0 )
                 {
@@ -1193,8 +1214,12 @@ void TTextEdit::mousePressEvent( QMouseEvent * event )
         QAction * action = new QAction("copy", this );
         action->setStatusTip(tr("copy selected text to clipboard"));
         connect( action, SIGNAL(triggered()), this, SLOT(slot_copySelectionToClipboard()));
+        QAction * action2 = new QAction("copy HTML", this );
+        action->setStatusTip(tr("copy selected text with colors as HTML (for web browsers)"));
+        connect( action2, SIGNAL(triggered()), this, SLOT(slot_copySelectionToClipboardHTML()));
         QMenu * popup = new QMenu( this );
         popup->addAction( action );
+        popup->addAction( action2 );
         popup->popup( mapToGlobal( event->pos() ), action );
         event->accept();
         return;
@@ -1221,6 +1246,12 @@ void TTextEdit::slot_copySelectionToClipboard()
     copySelectionToClipboard();
 }
 
+void TTextEdit::slot_copySelectionToClipboardHTML()
+{
+    copySelectionToClipboardHTML();
+}
+
+
 void TTextEdit::copySelectionToClipboard()
 {
     if( ( mPA.y() == mPB.y() ) && ( mPA.x() > mPB.x() ) )
@@ -1235,7 +1266,7 @@ void TTextEdit::copySelectionToClipboard()
 
     for( int y=mPA.y(); y<=mPB.y()+1; y++ )
     {
-        if( y >= mpBuffer->buffer.size() ) return;
+        if( y >= static_cast<int>(mpBuffer->buffer.size()) ) return;
         int x = 0;
         if( y == mPA.y() ) x = mPA.x();
         while( x < static_cast<int>( mpBuffer->buffer[y].size() ) )
@@ -1256,6 +1287,48 @@ void TTextEdit::copySelectionToClipboard()
         }
         text.append("\n");
     }
+}
+
+void TTextEdit::copySelectionToClipboardHTML()
+{
+    if( ( mPA.y() == mPB.y() ) && ( mPA.x() > mPB.x() ) )
+    {
+        swap( mPA, mPB );
+    }
+    if( mPA.y() > mPB.y() )
+    {
+        swap( mPA, mPB );
+    }
+    QString text = "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01//EN' 'http://www.w3.org/TR/html4/strict.dtd'><html><head><style><!-- *{ font-family: 'Courier New', 'Monospace', 'Courier';} *{ white-space: pre-wrap; } *{color:rgb(255,255,255);} *{background-color:rgb(";
+    text.append(QString::number(mpHost->mBgColor.red()));
+    text.append(",");
+    text.append(QString::number(mpHost->mBgColor.green()));
+    text.append(",");
+    text.append(QString::number(mpHost->mBgColor.blue()));
+    text.append(");} --></style><meta http-equiv='content-type' content='text/html; charset=utf-8'></head><body>");
+
+    for( int y=mPA.y(); y<=mPB.y(); y++ )
+    {
+        if( y >= static_cast<int>(mpBuffer->buffer.size()) ) return;
+        int x = 0;
+        if( y == mPA.y() )
+        {
+            x = mPA.x();
+            text.append(mpBuffer->bufferToHtml( QPoint(x,y), QPoint(-1,y)));
+        }
+        else if ( y == mPB.y() )
+        {
+            x = mPB.x();
+            text.append(mpBuffer->bufferToHtml( QPoint(0,y), QPoint(x,y)));
+        }
+        else
+            text.append(mpBuffer->bufferToHtml( QPoint(0,y), QPoint(-1,y)));
+    }
+    QClipboard * clipboard = QApplication::clipboard();
+    clipboard->setText( text );
+    mSelectedRegion = QRegion( 0, 0, 0, 0 );
+    forceUpdate();
+    return;
 }
 
 void TTextEdit::mouseReleaseEvent( QMouseEvent * event )
@@ -1314,7 +1387,7 @@ void TTextEdit::resizeEvent( QResizeEvent * event )
 
 void TTextEdit::wheelEvent ( QWheelEvent * e )
 {
-    int delta = e->delta() / 8 / 15;
+    //int delta = e->delta() / 8 / 15;
 
     int k = 3;//10 + (abs(delta) * 50) - 50;
     if( e->delta() < 0 )

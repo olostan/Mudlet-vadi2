@@ -1,7 +1,7 @@
 
 /***************************************************************************
- *   Copyright (C) 2008 by Heiko Koehn                                     *
- *   KoehnHeiko@googlemail.com                                             *
+ *   Copyright (C) 2008-2011 by Heiko Koehn  KoehnHeiko@googlemail.com     *
+ *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -40,24 +40,62 @@
 
 
 Host::Host( int port, QString hostname, QString login, QString pass, int id )
-: mHostName          ( hostname )
-, mLogin             ( login )
-, mPass              ( pass )
-, mpEditorDialog(0)
+: mTelnet( this )
+, mpConsole( 0 )
 , mLuaInterpreter    ( this, id )
-, mTimeout           ( 60 )
-, mRetries           ( 5 )
-, mPort              ( port )
 , mTriggerUnit       ( this )
 , mTimerUnit         ( this )
 , mScriptUnit        ( this )
 , mAliasUnit         ( this )
 , mActionUnit        ( this )
 , mKeyUnit           ( this )
-, mTelnet            ( this )
-, mHostID            ( id )
-, mCommandFgColor    ( QColor(113,113,  0) )
-, mCommandBgColor    ( QColor(  0,  0,  0) )
+, commandLineMinimumHeight( 30 )
+, mAlertOnNewData( true )
+, mAllowToSendCommand( true )
+, mAutoClearCommandLineAfterSend( false )
+, mBlockScriptCompile( true )
+, mBorderBottomHeight( 0 )
+, mBorderLeftWidth( 0 )
+, mBorderRightWidth( 0 )
+, mBorderTopHeight( 0 )
+, mCodeCompletion( true )
+, mCommandLineFont   ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//( QFont("Monospace", 10, QFont::Courier) )
+, mCommandSeparator  ( QString(";") )
+, mCommandSeperator  ( QString(";") )
+, mDisableAutoCompletion( false )
+, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont:://( QFont("Monospace", 10, QFont::Courier) ), mPort              ( port )
+, mEnableGMCP( false )
+, mFORCE_GA_OFF( false )
+, mFORCE_NO_COMPRESSION( false )
+, mFORCE_SAVE_ON_EXIT( false )
+, mHostID( id )
+, mHostName( hostname )
+, mInsertedMissingLF( false )
+, mIsGoingDown( false )
+, mLF_ON_GA( true )
+, mLogin( login )
+, mMainIconSize( 3 )
+, mNoAntiAlias( false )
+, mPass( pass )
+, mpEditorDialog(0)
+, mpMap( new TMap( this ) )
+, mpNotePad( 0 )
+, mPort(port)
+, mPrintCommand( true )
+, mRawStreamDump( false )
+, mResetProfile( false )
+, mRetries( 5 )
+, mSaveProfileOnExit( false )
+, mScreenHeight( 25 )
+, mScreenWidth( 90 )
+, mTEFolderIconSize( 3 )
+, mTimeout( 60 )
+, mUSE_FORCE_LF_AFTER_PROMPT( false )
+, mUSE_IRE_DRIVER_BUGFIX( true )
+, mUSE_UNIX_EOL( false )
+, mWrapAt( 100 )
+, mWrapIndentCount( 0 )
+
 , mBlack             ( QColor(  0,  0,  0) )
 , mLightBlack        ( QColor(128,128,128) )
 , mRed               ( QColor(128,  0,  0) )
@@ -76,44 +114,26 @@ Host::Host( int port, QString hostname, QString login, QString pass, int id )
 , mWhite             ( QColor(192,192,192) )
 , mFgColor           ( QColor(192,192,192) )
 , mBgColor           ( QColor(  0,  0,  0) )
-, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont:://( QFont("Monospace", 10, QFont::Courier) )
-, mCommandLineFont   ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//( QFont("Monospace", 10, QFont::Courier) )
-, mCommandSeperator  ( QString(";") )
-, mWrapAt( 100 )
-, mWrapIndentCount( 0 )
-, mPrintCommand( true )
-, mAutoClearCommandLineAfterSend( false )
-, mCommandSeparator( ';' )
-, mDisableAutoCompletion( false )
-, mSaveProfileOnExit( false )
-, mUSE_IRE_DRIVER_BUGFIX( true )
-, mScreenWidth( 90 )
-, mScreenHeight( 25 )
-, mUSE_FORCE_LF_AFTER_PROMPT( false )
-, mBorderTopHeight( 0 )
-, mBorderBottomHeight( 0 )
-, mBorderLeftWidth( 0 )
-, mBorderRightWidth( 0 )
-, mUSE_UNIX_EOL( false )
-, mBlockScriptCompile( true )
-, mMainIconSize( 3 )
-, mTEFolderIconSize( 3 )
-, mIsGoingDown( false )
-, mNoAntiAlias( false )
-, mRawStreamDump( false )
-, mCodeCompletion( true )
-, mpNotePad( 0 )
-, mInsertedMissingLF( false )
-, mLF_ON_GA( true )
-, mAlertOnNewData( true )
-, mpMap( new TMap( this ) )
-, mFORCE_NO_COMPRESSION( false )
-, mFORCE_GA_OFF( false )
-, mFORCE_SAVE_ON_EXIT( false )
-, mEnableGMCP( false )
-, commandLineMinimumHeight( 30 )
-, mResetProfile( false )
-, mAllowToSendCommand( true )
+, mCommandBgColor    ( QColor(  0,  0,  0) )
+, mCommandFgColor    ( QColor(113,113,  0) )
+, mBlack_2             ( QColor(  0,  0,  0, 255) )
+, mLightBlack_2        ( QColor(128,128,128, 255) )
+, mRed_2               ( QColor(128,  0,  0, 255) )
+, mLightRed_2          ( QColor(255,  0,  0, 255) )
+, mLightGreen_2        ( QColor(  0,255,  0, 255) )
+, mGreen_2             ( QColor(  0,179,  0, 255) )
+, mLightBlue_2         ( QColor(  0,  0, 255, 255) )
+, mBlue_2              ( QColor(  0,  0, 128, 255) )
+, mLightYellow_2       ( QColor(255,255,  0, 255) )
+, mYellow_2            ( QColor(128,128,  0, 255) )
+, mLightCyan_2         ( QColor(  0,255,255, 255) )
+, mCyan_2              ( QColor(  0,128,128, 255) )
+, mLightMagenta_2      ( QColor(255,  0,255, 255) )
+, mMagenta_2           ( QColor(128,  0,128, 255) )
+, mLightWhite_2        ( QColor(255,255,255, 255) )
+, mWhite_2             ( QColor(192,192,192, 255) )
+, mFgColor_2           ( QColor(192,192,192, 255) )
+, mBgColor_2           ( QColor(  0,  0,  0, 255) )
 {
     QString directoryLogFile = QDir::homePath()+"/.config/mudlet/profiles/";
     directoryLogFile.append(mHostName);
@@ -129,31 +149,65 @@ Host::Host( int port, QString hostname, QString login, QString pass, int id )
     mErrorLogStream.setDevice( &mErrorLogFile );
     mpMap->restore();
     mpMap->init( this );
+    mMapStrongHighlight = false;
 }
 
 Host::Host()
-: mHostName          ( "default-host" )
-, mLogin             ( "" )
-, mPass              ( "" )
+: mTelnet( this )
+, mpConsole( 0 )
 , mLuaInterpreter    ( this, 0 )
-, mTimeout           ( 60 )
-, mRetries           ( 5 )
-, mPort              ( 23 )
-, mLF_ON_GA( true )//wird von telnet gebraucht
-, mUSE_IRE_DRIVER_BUGFIX( true ) //wird von telnet gebraucht
-, mUSE_UNIX_EOL( false )//wird von telnet gebraucht
-, mFORCE_NO_COMPRESSION( false ) //wird von telnet gebraucht
-, mFORCE_GA_OFF( false ) //wird von telnet gebraucht
 , mTriggerUnit       ( this )
 , mTimerUnit         ( this )
 , mScriptUnit        ( this )
 , mAliasUnit         ( this )
 , mActionUnit        ( this )
 , mKeyUnit           ( this )
-, mTelnet            ( this )
-, mHostID            ( 0 )
-, mCommandFgColor    ( QColor(113,113,  0) )
-, mCommandBgColor    ( QColor(  0,  0,  0) )
+, commandLineMinimumHeight( 30 )
+, mAlertOnNewData( true )
+, mAllowToSendCommand( true )
+, mAutoClearCommandLineAfterSend( false )
+, mBlockScriptCompile( true )
+, mBorderBottomHeight( 0 )
+, mBorderLeftWidth( 0 )
+, mBorderRightWidth( 0 )
+, mBorderTopHeight( 0 )
+, mCodeCompletion( true )
+, mCommandLineFont   ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//( QFont("Monospace", 10, QFont::Courier) )
+, mCommandSeparator  ( QString(";") )
+, mCommandSeperator  ( QString(";") )
+, mDisableAutoCompletion( false )
+, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont:://( QFont("Monospace", 10, QFont::Courier) ), mPort              ( port )
+, mEnableGMCP( false )
+, mFORCE_GA_OFF( false )
+, mFORCE_NO_COMPRESSION( false )
+, mFORCE_SAVE_ON_EXIT( false )
+, mHostID( 0 )
+, mHostName( "default-host" )
+, mInsertedMissingLF( false )
+, mIsGoingDown( false )
+, mLF_ON_GA( true )
+, mLogin( "" )
+, mMainIconSize( 3 )
+, mNoAntiAlias( false )
+, mPass( "" )
+, mpEditorDialog(0)
+, mpMap( new TMap( this ) )
+, mpNotePad( 0 )
+, mPort(23)
+, mPrintCommand( true )
+, mRawStreamDump( false )
+, mResetProfile( false )
+, mRetries( 5 )
+, mSaveProfileOnExit( false )
+, mScreenHeight( 25 )
+, mScreenWidth( 90 )
+, mTEFolderIconSize( 3 )
+, mTimeout( 60 )
+, mUSE_FORCE_LF_AFTER_PROMPT( false )
+, mUSE_IRE_DRIVER_BUGFIX( true )
+, mUSE_UNIX_EOL( false )
+, mWrapAt( 100 )
+, mWrapIndentCount( 0 )
 , mBlack             ( QColor(  0,  0,  0) )
 , mLightBlack        ( QColor(128,128,128) )
 , mRed               ( QColor(128,  0,  0) )
@@ -172,42 +226,43 @@ Host::Host()
 , mWhite             ( QColor(192,192,192) )
 , mFgColor           ( QColor(192,192,192) )
 , mBgColor           ( QColor(  0,  0,  0) )
-, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//, mDisplayFont       ( QFont("Bitstream Vera Sans Mono", 10, QFont:://( QFont("Monospace", 10, QFont::Courier) )
-, mCommandLineFont   ( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//( QFont("Monospace", 10, QFont::Courier) )
-, mCommandSeperator  ( QString(";") )
-, mWrapAt( 100 )
-, mWrapIndentCount( 0 )
-, mPrintCommand( true )
-, mAutoClearCommandLineAfterSend( false )
-, mCommandSeparator( ';' )
-, mDisableAutoCompletion( false )
-, mSaveProfileOnExit( false )
-, mScreenWidth( 90 )
-, mScreenHeight( 25 )
-, mUSE_FORCE_LF_AFTER_PROMPT( false )
-, mBorderTopHeight( 0 )
-, mBorderBottomHeight( 0 )
-, mBorderLeftWidth( 0 )
-, mBorderRightWidth( 0 )
-
-, mBlockScriptCompile( true )
-, mMainIconSize( 3 )
-, mTEFolderIconSize( 3 )
-, mIsGoingDown( false )
-, mNoAntiAlias( true )
-, mRawStreamDump( false )
-, mCodeCompletion( true )
-, mpNotePad( 0 )
-, mInsertedMissingLF( false )
-
-, mAlertOnNewData( true )
-, mpMap( new TMap(this) )
-, mResetProfile( false )
-, mAllowToSendCommand( true )
+, mCommandBgColor    ( QColor(  0,  0,  0) )
+, mCommandFgColor    ( QColor(113,113,  0) )
+, mBlack_2             ( QColor(  0,  0,  0, 255) )
+, mLightBlack_2        ( QColor(128,128,128, 255) )
+, mRed_2               ( QColor(128,  0,  0, 255) )
+, mLightRed_2          ( QColor(255,  0,  0, 255) )
+, mLightGreen_2        ( QColor(  0,255,  0, 255) )
+, mGreen_2             ( QColor(  0,179,  0, 255) )
+, mLightBlue_2         ( QColor(  0,  0, 255, 255) )
+, mBlue_2              ( QColor(  0,  0, 128, 255) )
+, mLightYellow_2       ( QColor(255,255,  0, 255) )
+, mYellow_2            ( QColor(128,128,  0, 255) )
+, mLightCyan_2         ( QColor(  0,255,255, 255) )
+, mCyan_2              ( QColor(  0,128,128, 255) )
+, mLightMagenta_2      ( QColor(255,  0,255, 255) )
+, mMagenta_2           ( QColor(128,  0,128, 255) )
+, mLightWhite_2        ( QColor(255,255,255, 255) )
+, mWhite_2             ( QColor(192,192,192, 255) )
+, mFgColor_2           ( QColor(192,192,192, 255) )
+, mBgColor_2           ( QColor(  0,  0,  0, 255) )
 {
-    qDebug()<<"######################################################################################";
-    qDebug()<<"#########     ERROR DEFAULT HOST CONSTRUCTOR USED            #########################";
-    qDebug()<<"######################################################################################";
+    QString directoryLogFile = QDir::homePath()+"/.config/mudlet/profiles/";
+    directoryLogFile.append(mHostName);
+    directoryLogFile.append("/log");
+    QString logFileName = directoryLogFile + "/errors.txt";
+    QDir dirLogFile;
+    if( ! dirLogFile.exists( directoryLogFile ) )
+    {
+        dirLogFile.mkpath( directoryLogFile );
+    }
+    mErrorLogFile.setFileName( logFileName );
+    mErrorLogFile.open( QIODevice::Append );
+    mErrorLogStream.setDevice( &mErrorLogFile );
+    mpMap->restore();
+    mpMap->init( this );
+    mMapStrongHighlight = false;
+
 }
 
 Host::~Host()
@@ -218,26 +273,38 @@ Host::~Host()
 
 void Host::resetProfile()
 {
-    getTriggerUnit()->removeAllTempTriggers();
+    getTimerUnit()->stopAllTriggers();
+    mudlet::self()->mTimerMap.clear();
     getTimerUnit()->removeAllTempTimers();
+    getTriggerUnit()->removeAllTempTriggers();
+
+
+
     mTimerUnit.doCleanup();
     mTriggerUnit.doCleanup();
     mpConsole->resetMainConsole();
+    mEventHandlerMap.clear();
+    mEventMap.clear();
     mLuaInterpreter.initLuaGlobals();
     mLuaInterpreter.loadGlobal();
     mBlockScriptCompile = false;
-    getScriptUnit()->compileAll();
-    getTimerUnit()->compileAll();
+
+
     getTriggerUnit()->compileAll();
     getAliasUnit()->compileAll();
     getActionUnit()->compileAll();
     getKeyUnit()->compileAll();
+    getScriptUnit()->compileAll();
+    //getTimerUnit()->compileAll();
     mResetProfile = false;
+
+    mTimerUnit.reenableAllTriggers();
 
     TEvent event;
     event.mArgumentList.append( "sysLoadEvent" );
     event.mArgumentTypeList.append(ARGUMENT_TYPE_STRING);
     raiseEvent( & event );
+    qDebug()<<"resetProfile() DONE";
 }
 
 void Host::assemblePath()
@@ -323,7 +390,6 @@ void Host::send( QString cmd, bool wantPrint, bool dontExpandAliases )
         }
         mpConsole->update();
     }
-
     QStringList commandList = cmd.split( QString( mCommandSeparator ), QString::SkipEmptyParts );
     if( ! dontExpandAliases )
     {
@@ -449,11 +515,15 @@ void Host::callEventHandlers()
 
 }
 
-void Host::incomingStreamProcessor( QString & data, QString & prompt, int line )
+void Host::incomingStreamProcessor( QString & data, int line )
 {
     mTriggerUnit.processDataStream( data, line );
 
     mTimerUnit.doCleanup();
+    if( mResetProfile )
+    {
+        resetProfile();
+    }
 }
 
 void Host::registerEventHandler( QString name, TScript * pScript )
@@ -487,35 +557,6 @@ void Host::raiseEvent( TEvent * pE )
     {
         scriptList.value( i )->callEventHandler( pE );
     }
-}
-
-void Host::gotRest( QString & data )
-{
-/*
-    mRest = data;
-    if( mpConsole )
-    {
-        mpConsole->printOnDisplay( data );
-    }*/
-}
-
-void Host::gotLine( QString & data )
-{
-   /* if( mpConsole )
-    {
-        mpConsole->printOnDisplay( data );
-    }*/
-}
-
-void Host::gotPrompt( QString & data )
-{
-    /*mPrompt = data;
-    QString promptVar("prompt");
-    mLuaInterpreter.set_lua_string( promptVar, mPrompt );
-    if( mpConsole )
-    {
-        mpConsole->printOnDisplay( data );
-    }*/
 }
 
 void Host::enableTimer( QString & name )

@@ -1,5 +1,7 @@
-CONFIG += release warn_off
-QMAKE_CXXFLAGS_RELEASE += -O3
+#CONFIG += release warn_off
+CONFIG += debug
+QMAKE_CXXFLAGS_RELEASE += -O3 -Wno-deprecated -Wno-unused-parameter
+QMAKE_CXXFLAGS_DEBUG += -O3 -Wno-deprecated -Wno-unused-parameter
 MOC_DIR = ./tmp
 OBJECTS_DIR = ./tmp
 QT += network opengl
@@ -16,7 +18,7 @@ win32:LIBS += -Lc:\mudlet_package \
 unix:INCLUDEPATH += /usr/include/lua5.1
 win32:INCLUDEPATH += c:\Lua\include \
     c:\zlib-1.2.5\
-    c:\boost_1_44_0 \
+    c:\boost_1_45_0 \
     c:\pcre-8.0-lib\include \
     c:\yajl\yajl\src
 unix:isEmpty( INSTALL_PREFIX ):INSTALL_PREFIX = /usr/local
@@ -24,6 +26,7 @@ unix: {
     SHARE_DIR = /usr/local/share/mudlet
     BIN_DIR = $$INSTALL_PREFIX/bin
 }
+INCLUDEPATH += irc/include
 SOURCES += TConsole.cpp \
     ctelnet.cpp \
     main.cpp \
@@ -89,7 +92,27 @@ SOURCES += TConsole.cpp \
     TRoom.cpp \
     TMap.cpp \
     lua_yajl.c \
-    TBuffer.cpp
+    TBuffer.cpp \
+    hunspell/affentry.cxx \
+    hunspell/affixmgr.cxx \
+    hunspell/csutil.cxx \
+    hunspell/dictmgr.cxx \
+    hunspell/hashmgr.cxx \
+    hunspell/hunspell.cxx \
+    hunspell/suggestmgr.cxx \
+    hunspell/phonet.cxx \
+    hunspell/filemgr.cxx \
+    hunspell/hunzip.cxx \
+    hunspell/replist.cxx \
+    irc/src/ircbuffer.cpp \
+    irc/src/irc.cpp \
+    irc/src/ircsession.cpp \
+    irc/src/ircutil.cpp \
+    dlgIRC.cpp \
+    T2DMap.cpp \
+    dlgRoomExits.cpp
+
+
 HEADERS += mudlet.h \
     TTimer.h \
     EAction.h \
@@ -155,7 +178,15 @@ HEADERS += mudlet.h \
     TMap.h \
     glwidget.h \
     dlgMapper.h \
-    Tree.h
+    Tree.h \
+    irc/include/ircbuffer.h \
+    irc/include/irc.h \
+    irc/include/ircsession.h \
+    irc/include/ircutil.h \
+    dlgIRC.h \
+    T2DMap.h \
+    dlgRoomExits.h
+
 FORMS += ui/connection_profiles.ui \
     ui/main_window.ui \
     ui/trigger_editor.ui \
@@ -179,7 +210,10 @@ FORMS += ui/connection_profiles.ui \
     ui/trigger_pattern_edit.ui \
     ui/composer.ui \
     ui/mapper.ui \
-    ui/profile_preferences.ui
+    ui/profile_preferences.ui \
+    ui/irc.ui \
+    ui/mapper_room_color.ui \
+    ui/room_exits.ui
 TEMPLATE = app
 TARGET = mudlet
 RESOURCES = mudlet_alpha.qrc
@@ -197,3 +231,6 @@ INSTALLS += fonts \
     luaglobal \
     documentation \
     target
+
+OTHER_FILES += \
+    mudlet_documentation.txt

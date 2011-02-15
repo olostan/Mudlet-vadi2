@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Heiko Koehn (KoehnHeiko@googlemail.com)         *
+ *   Copyright (C) 2008-2011 by Heiko Koehn  KoehnHeiko@googlemail.com     *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,6 +27,7 @@ class TRoom;
 class TArea;
 class Host;
 class GLWidget;
+class T2DMap;
 
 #include <QMap>
 #include "TRoom.h"
@@ -43,11 +44,25 @@ class TMap
 public:
     TMap( Host *);
     bool addRoom( int id=0 );
+    void deleteRoom( int id );
+    void deleteArea( int id );
     int  createNewRoomID();
+    bool fixExits2(int);
+    void tidyMap( int area );
+    void getConnectedNodesGreaterThanX( int id, int x );
+    void getConnectedNodesSmallerThanX( int id, int x );
+    void getConnectedNodesGreaterThanY( int id, int x );
+    void getConnectedNodesSmallerThanY( int id, int x );
+    bool plausabilitaetsCheck( int area );
+    void astBreitenAnpassung( int id, int );
+    void astHoehenAnpassung( int id, int );
     bool setExit( int from, int to, int dir );
     bool setRoomCoordinates( int id, int x, int y, int z );
     void init(Host*);
     void buildAreas();
+    bool fixExits( int id, int dir );
+    QList<int> detectRoomCollisions( int id );
+    void solveRoomCollision( int id, int creationDirection, bool PCheck=true );
     void setRoom( int );
     bool findPath( int from, int to );
     bool gotoRoom( int );
@@ -68,6 +83,13 @@ public:
     QMap<int,QColor> customEnvColors;
     GLWidget * mpM;
     dlgMapper * mpMapper;
+    QList<int> mTestedNodes;
+    QList<int> conList;
+    int mPlausaOptOut;
+    QMap<QString,int> hashTable;
+    QMap<QString, int> pixNameTable;
+    QMap<int, QPixmap> pixTable;
+
 
 };
 

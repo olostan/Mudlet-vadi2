@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Heiko Koehn (KoehnHeiko@googlemail.com)    *
+ *   Copyright (C) 2008-2011 by Heiko Koehn (KoehnHeiko@googlemail.com)    *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -61,24 +61,25 @@ TConsole::TConsole( Host * pH, bool isDebugConsole, QWidget * parent )
 : QWidget( parent )
 , mpHost( pH )
 , buffer( pH )
-, mIsDebugConsole( isDebugConsole )
-, mDisplayFont( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//mDisplayFont( QFont("Monospace", 10, QFont::Courier ) )
-, mFgColor( QColor( 0, 0, 0 ) )
-, mBgColor( QColor( 255, 255, 255 ) )
-, mCommandFgColor( QColor( 213, 195, 0 ) )
-, mCommandBgColor( QColor( 0, 0, 0 ) )
-, mSystemMessageFgColor( QColor( 255,0,0 ) )
-, mSystemMessageBgColor( mBgColor )
-, mWrapAt( 100 )
-, mIndentCount( 0 )
-, mTriggerEngineMode( false )
-, mClipboard( mpHost )
-, mpScrollBar( new QScrollBar )
 , emergencyStop( new QToolButton )
 , layerCommandLine( 0 )
+, mBgColor( QColor( 255, 255, 255 ) )
+, mClipboard( mpHost )
+, mCommandBgColor( QColor( 0, 0, 0 ) )
+, mCommandFgColor( QColor( 213, 195, 0 ) )
+, mConsoleName( "main" )
+, mDisplayFont( QFont("Bitstream Vera Sans Mono", 10, QFont::Courier ) )//mDisplayFont( QFont("Monospace", 10, QFont::Courier ) )
+, mFgColor( QColor( 0, 0, 0 ) )
+, mIndentCount( 0 )
+, mIsDebugConsole( isDebugConsole )
 , mLogFileName(QString(""))
 , mLogToLogFile( false )
-, networkLatency( new QLineEdit )
+, mMainFrameBottomHeight( 0 )
+, mMainFrameLeftWidth( 0 )
+, mMainFrameRightWidth( 0 )
+, mMainFrameTopHeight( 0 )
+, mOldX( 0 )
+, mOldY( 0 )
 , mpBaseVFrame( new QWidget( this ) )
 , mpTopToolBar( new QWidget( mpBaseVFrame ) )
 , mpBaseHFrame( new QWidget( mpBaseVFrame ) )
@@ -86,17 +87,18 @@ TConsole::TConsole( Host * pH, bool isDebugConsole, QWidget * parent )
 , mpMainFrame( new QWidget( mpBaseHFrame ) )
 , mpRightToolBar( new QWidget( mpBaseHFrame ) )
 , mpMainDisplay( new QWidget( mpMainFrame ) )
-, mMainFrameTopHeight( 0 )
-, mMainFrameBottomHeight( 0 )
-, mMainFrameLeftWidth( 0 )
-, mMainFrameRightWidth( 0 )
-, mRecordReplay( false )
-, mConsoleName( "main" )
-, mWindowIsHidden( false )
-, mOldX( 0 )
-, mOldY( 0 )
-, mUserConsole( false )
 , mpMapper( 0 )
+, mpScrollBar( new QScrollBar )
+
+, mRecordReplay( false )
+, mSystemMessageBgColor( mBgColor )
+, mSystemMessageFgColor( QColor( 255,0,0 ) )
+, mTriggerEngineMode( false )
+, mUserConsole( false )
+, mWindowIsHidden( false )
+, mWrapAt( 100 )
+, networkLatency( new QLineEdit )
+, mLastBufferLogLine( 0 )
 {
     QShortcut * ps = new QShortcut(this);
     ps->setKey(Qt::CTRL + Qt::Key_W);
@@ -600,20 +602,6 @@ void TConsole::refresh()
 
 void TConsole::closeEvent( QCloseEvent *event )
 {
-    if( mUserConsole )
-    {
-        if( ! mudlet::self()->isGoingDown() )
-        {
-            hide();
-            event->ignore();
-            return;
-        }
-        else
-        {
-            event->accept();
-            return;
-        }
-    }
     if( mIsDebugConsole )
     {
         if( ! mudlet::self()->isGoingDown() )
@@ -630,6 +618,21 @@ void TConsole::closeEvent( QCloseEvent *event )
             return;
         }
     }
+    if( mUserConsole )
+    {
+        if( ! mudlet::self()->isGoingDown() )
+        {
+            hide();
+            event->ignore();
+            return;
+        }
+        else
+        {
+            event->accept();
+            return;
+        }
+    }
+
     if( profile_name != "default_host" )
     {
         if( mpHost->mFORCE_SAVE_ON_EXIT )
@@ -753,6 +756,7 @@ void TConsole::slot_toggleLogging()
     mLogToLogFile = ! mLogToLogFile;
     if( mLogToLogFile )
     {
+        mLastBufferLogLine = buffer.size();
         QString directoryLogFile = QDir::homePath()+"/.config/mudlet/profiles/"+profile_name+"/log";
         QString mLogFileName = directoryLogFile + "/"+QDateTime::currentDateTime().toString("dd-MM-yyyy#hh-mm-ss");
         if( mpHost->mRawStreamDump )
@@ -925,24 +929,32 @@ void TConsole::printOnDisplay( std::string & incomingSocketData )
 {
     //buffer.messen();
     QString prompt ="";//FIXME
-    if( mLogToLogFile )
-    {
-        QString log = incomingSocketData.c_str();
-        if( ! mIsDebugConsole )
-        {
-            if( mpHost->mRawStreamDump )
-            {
-                QString toLog = logger_translate( log );
-                toLog.replace(QChar(255), "\n");
-                toLog.replace('\n', "<\\ br>");
-                mLogStream << toLog;
-            }
-        }
-    }
+
     mProcessingTime.restart();
     mTriggerEngineMode = true;
     buffer.translateToPlainText( incomingSocketData );
     mTriggerEngineMode = false;
+    if( mLogToLogFile )
+    {
+        if( ! mIsDebugConsole )
+        {
+            if( mpHost->mRawStreamDump )
+            {
+                if( buffer.size() > mLastBufferLogLine + 1 )
+                {
+                    for( int i=mLastBufferLogLine+1; i<buffer.size(); i++ )
+                    {
+                        QPoint P1 = QPoint(0,i);
+                        QPoint P2 = QPoint( buffer.buffer[i].size(), i);
+                        QString toLog = buffer.bufferToHtml(P1, P2);
+                        mLastBufferLogLine++;
+                        mLogStream << toLog;
+                    }
+                    mLastBufferLogLine--;
+                }
+            }
+        }
+    }
     double processT = mProcessingTime.elapsed();
     if( mpHost->mTelnet.mGA_Driver )
     {
@@ -959,6 +971,7 @@ void TConsole::runTriggers( int line )
 {
     mDeletedLines = 0;
     mUserCursor.setY( line );
+    mIsPromptLine = buffer.promptBuffer.at( line );
     mEngineCursor = line;
     mUserCursor.setX( 0 );
     mCurrentLine = buffer.line( line );
@@ -979,16 +992,11 @@ void TConsole::runTriggers( int line )
     {
         TDebug(QColor(Qt::darkGreen),QColor(Qt::black)) << "new line arrived:">>0; TDebug(QColor(Qt::lightGray),QColor(Qt::black)) << mCurrentLine<<"\n">>0;
     }
-    QString prompt;
-    mpHost->incomingStreamProcessor( mCurrentLine, prompt, line );
+    mpHost->incomingStreamProcessor( mCurrentLine, line );
+    mIsPromptLine = false;
 
     //FIXME: neu schreiben: wenn lines oberhalb der aktuellen zeile gelöscht wurden->redraw clean slice
     //       ansonsten einfach löschen
-    /*if( mDeletedLines > 0 )
-    {
-        mDeletedLines = 0;
-        buffer.newLines--;
-    }*/
 }
 
 void TConsole::finalize()
@@ -1262,6 +1270,7 @@ void TConsole::showEvent( QShowEvent * event )
             mpHost->mTelnet.mAlertOnNewData = false;
         }
     }
+    QWidget::showEvent( event );//FIXME-refac: might cause problems
 }
 
 void TConsole::hideEvent( QHideEvent * event )
@@ -1279,6 +1288,7 @@ void TConsole::hideEvent( QHideEvent * event )
             }
         }
     }
+    QWidget::hideEvent( event );//FIXME-refac: might cause problems
 }
 
 
@@ -1355,11 +1365,11 @@ void TConsole::insertLink( QString text, QStringList & func, QStringList & hint,
         if( ( buffer.buffer.size() == 0 && buffer.buffer[0].size() == 0 ) || mUserCursor == buffer.getEndPos() )
         {
             if( customFormat )
-                buffer.addLink( text, func, hint, mFormatCurrent );
+                buffer.addLink( mTriggerEngineMode, text, func, hint, mFormatCurrent );
             else
             {
                 TChar _f = TChar(0,0,255,mBgColor.red(), mBgColor.green(), mBgColor.blue(), false, false, true );
-                buffer.addLink( text, func, hint, _f );
+                buffer.addLink( mTriggerEngineMode, text, func, hint, _f );
             }
 
             /*buffer.append( text,
@@ -1584,7 +1594,6 @@ int TConsole::getLineCount()
 QStringList TConsole::getLines( int from, int to )
 {
     QStringList ret;
-    int pos = mUserCursor.y();
     int delta = abs( from - to );
     for( int i=0; i<delta; i++ )
     {
@@ -1749,11 +1758,7 @@ bool TConsole::setMiniConsoleFontSize( std::string & buf, int size )
         pC->console2->forceUpdate();
         return true;
     }
-    else
-    {
-        false;
-    }
-
+    return false;
 }
 
 QString TConsole::getCurrentLine()
@@ -1859,7 +1864,7 @@ bool TConsole::selectSection( int from, int to )
     {
         return false;
     }
-    if( mUserCursor.y() >= buffer.buffer.size() )
+    if( mUserCursor.y() >= static_cast<int>(buffer.buffer.size()) )
     {
         return false;
     }
@@ -1982,18 +1987,18 @@ void TConsole::printCommand( QString & msg )
 void TConsole::echoLink( QString & text, QStringList & func, QStringList & hint, bool customFormat )
 {
     if( customFormat )
-        buffer.addLink( text, func, hint, mFormatCurrent );
+        buffer.addLink( mTriggerEngineMode, text, func, hint, mFormatCurrent );
     else
     {
         if( ! mIsSubConsole && ! mIsDebugConsole )
         {
             TChar f = TChar(0, 0, 255, mpHost->mBgColor.red(), mpHost->mBgColor.green(), mpHost->mBgColor.blue(), false, false, true);
-            buffer.addLink( text, func, hint, f );
+            buffer.addLink( mTriggerEngineMode, text, func, hint, f );
         }
         else
         {
             TChar f = TChar(0, 0, 255, mBgColor.red(), mBgColor.green(), mBgColor.blue(), false, false, true);
-            buffer.addLink( text, func, hint, f );
+            buffer.addLink( mTriggerEngineMode, text, func, hint, f );
         }
     }
 }
@@ -2169,6 +2174,7 @@ void TConsole::createMapper( int x, int y, int width, int height )
     }
     mpMapper->resize( width, height );
     mpMapper->move( x, y );
+    mpMapper->mp2dMap->init();
     mpMapper->show();
 }
 
@@ -2284,7 +2290,6 @@ bool TConsole::printWindow( QString & name, QString & text )
 
 void TConsole::print( QString & msg )
 {
-    int lineBeforeNewContent = buffer.getLastLineNumber();
     buffer.append(  msg,
                     0,
                     msg.size(),
@@ -2406,9 +2411,6 @@ void TConsole::appendBuffer( TBuffer bufferSlice )
     console2->showNewLines();
 }
 
-void TConsole::slot_user_scrolling( int action )
-{
-}
 
 void TConsole::slot_stop_all_triggers( bool b )
 {
@@ -2450,6 +2452,7 @@ void TConsole::showStatistics()
     printSystemMessage( footer );
 
 }
+
 
 
 

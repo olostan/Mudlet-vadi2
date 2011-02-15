@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2009 by Heiko Koehn                                     *
- *   KoehnHeiko@googlemail.com                                             *
+ *   Copyright (C) 2008-2011 by Heiko Koehn  KoehnHeiko@googlemail.com     *
+ *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,6 +24,8 @@
 
 #include <string>
 #include <QObject>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
 #include <QProcess>
 #include <QTcpSocket>
 #include <QThread>
@@ -110,7 +112,29 @@ public:
     int startPermAlias( QString & name, QString & parent, QString & regex, QString & function );
 
     TGatekeeperThread * mpGatekeeperThread;
+    QNetworkAccessManager * mpFileDownloader;
 
+    static int setRoomChar( lua_State * );
+    static int deleteArea( lua_State * );
+    static int deleteRoom( lua_State * );
+    static int getRoomAreaName( lua_State * );
+    static int addAreaName( lua_State *L );
+    static int getRoomIDbyHash( lua_State *L );
+    static int setRoomIDbyHash( lua_State *L );
+    static int sendSocket( lua_State * L );
+    static int openUrl( lua_State * );
+    static int getRoomsByPosition( lua_State * );
+    static int getRoomEnv( lua_State * );
+    static int downloadFile( lua_State * );
+    static int setRoomUserData( lua_State * );
+    static int getRoomUserData( lua_State * );
+    static int clearRoomUserData( lua_State * );
+    static int addSpecialExit( lua_State * );
+    static int getSpecialExits( lua_State * );
+    static int getSpecialExitsSwap( lua_State * );
+    static int appendCmdLine( lua_State * );
+    static int clearSpecialExits( lua_State * );
+    static int solveRoomCollisions( lua_State * );
     static int setGridMode( lua_State * L );
     static int getCustomEnvColorTable( lua_State * L );
     static int setRoomName( lua_State * );
@@ -282,6 +306,7 @@ public:
     void logError( std::string & e, QString &, QString & function );
 
     static std::map<lua_State *, Host *> luaInterpreterMap;
+    QMap<QNetworkReply *, QString> downloadMap;
 
 signals:
 
@@ -303,16 +328,13 @@ signals:
 
 public slots:
 
+    void replyFinished(QNetworkReply * reply );
     void slotOpenUserWindow( int, QString );
     void slotEchoUserWindow( int, QString, QString );
     void slotClearUserWindow( int, QString );
     void slotEnableTimer( int, QString );
     void slotDisableTimer( int, QString );
-    void slotSelect( int, QString, int );
-    void slotSelectSection( int, int, int );
     void slotReplace( int, QString );
-    void slotSetFgColor( int, int, int, int );
-    void slotSetBgColor( int, int, int, int );
     void slotEchoMessage( int, QString );
     void slotNewCommand( int, QString );
     void slotTempTimer( int hostID, double timeout, QString function, QString timerName );

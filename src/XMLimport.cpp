@@ -69,38 +69,23 @@ void XMLimport::readMap()
     while( ! atEnd() )
     {
         readNext();
-        qDebug()<<"ELEMENT:"<<name();
-       /* if( isEndElement() )
-        {
-            break;
-        }*/
 
         if( isStartElement() )
         {
 
             if( name() == "areas" )
             {
-                qDebug()<<"##  reading area table:";
                 mpHost->mpMap->areaNamesMap.clear();
                 readAreas();
-                //readNext(); //end element
-                //continue;
             }
             else if( name() == "rooms" )
             {
-                qDebug()<<"#################rooms starting:";
                 readRooms();
             }
             else if( name() == "environments" )
             {
-                qDebug()<<"################# ENV starting:";
                 readEnvColors();
             }
-           /* else
-            {
-                qDebug()<<"READING UNKONWN MAP ELEMENT!!!!!";
-                readUnknownMapElement();
-            }*/
         }
     }
 }
@@ -203,7 +188,6 @@ void XMLimport::readRoom()
             pT->x = attributes().value("x").toString().toInt();
             pT->y = attributes().value("y").toString().toInt();
             pT->z = attributes().value("z").toString().toInt();
-            qDebug()<<"------>coordinates:"<<pT->x<<"/"<<pT->y<<"/"<<pT->z;
             continue;
         }
         else if( name() == "exit")
@@ -211,7 +195,6 @@ void XMLimport::readRoom()
             QString dir = attributes().value("direction").toString();
             int e = attributes().value("target").toString().toInt();
             if( dir == "" ) continue;
-            qDebug()<<"------->exit: dir="<<dir<<" e="<<e;
             if( dir == "north" )
             {
                 pT->north = e;
@@ -595,6 +578,7 @@ void XMLimport::readHostPackage( Host * pT )
     pT->mFORCE_GA_OFF = ( attributes().value("mFORCE_GA_OFF") == "yes" );
     pT->mFORCE_SAVE_ON_EXIT = ( attributes().value("mFORCE_SAVE_ON_EXIT") == "yes" );
     pT->mEnableGMCP = ( attributes().value("mEnableGMCP") == "yes" );
+    pT->mMapStrongHighlight = ( attributes().value("mMapStrongHighlight") == "yes" );
 
     while( ! atEnd() )
     {
@@ -767,6 +751,96 @@ void XMLimport::readHostPackage( Host * pT )
             else if( name() == "mCommandLineFont")
             {
                 pT->mCommandLineFont.fromString( readElementText() );
+                continue;
+            }
+            else if( name() == "mFgColor2")
+            {
+                pT->mFgColor_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mBgColor2")
+            {
+                pT->mBgColor_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mBlack2")
+            {
+                pT->mBlack_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightBlack2")
+            {
+                pT->mLightBlack_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mRed2")
+            {
+                pT->mRed_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightRed2")
+            {
+                pT->mLightRed_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mBlue2")
+            {
+                pT->mBlue_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightBlue2")
+            {
+                pT->mLightBlue_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mGreen2")
+            {
+                pT->mGreen_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightGreen2")
+            {
+                pT->mLightGreen_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mYellow2")
+            {
+                pT->mYellow_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightYellow2")
+            {
+                pT->mLightYellow_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mCyan2")
+            {
+                pT->mCyan_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightCyan2")
+            {
+                pT->mLightCyan_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mMagenta2")
+            {
+                pT->mMagenta_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightMagenta2")
+            {
+                pT->mLightMagenta_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mWhite2")
+            {
+                pT->mWhite_2.setNamedColor( readElementText() );
+                continue;
+            }
+            else if( name() == "mLightWhite2")
+            {
+                pT->mLightWhite_2.setNamedColor( readElementText() );
                 continue;
             }
             else
