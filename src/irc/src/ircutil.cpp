@@ -175,8 +175,8 @@ namespace Irc
             // Don't consider trailing closing parenthesis part of the link when
             // there's an opening parenthesis preceding in the beginning of the
             // URL or there is no opening parenthesis in the URL at all.
-            if (pos > 0 && href.endsWith(QLatin1Char(')')) 
-                && (processed.at(pos-1) == QLatin1Char('(') 
+            if (pos > 0 && href.endsWith(QLatin1Char(')'))
+                && (processed.at(pos-1) == QLatin1Char('(')
                 || !href.contains(QLatin1Char('('))))
             {
                 append.prepend(href.right(1));
