@@ -6449,7 +6449,7 @@ void TLuaInterpreter::startLuaSessionInterpreter()
 // on initialization of a new session *or* in case of an interpreter reset by the user.
 void TLuaInterpreter::initLuaGlobals()
 {
-    pGlobalLua = lua_open();
+    pGlobalLua = luaL_newstate();
     TLuaInterpreter::luaInterpreterMap[pGlobalLua]=mpHost;
 
     luaL_openlibs( pGlobalLua );
