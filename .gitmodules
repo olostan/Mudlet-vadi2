@@ -1,0 +1,3 @@
+[submodule "src/mudlet-lua"]
+	path = src/mudlet-lua
+	url = git@github.com:vadi2/mudlet-lua.git
