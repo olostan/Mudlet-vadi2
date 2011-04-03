@@ -1443,10 +1443,12 @@ void cTelnet::handle_socket_signal_readyRead()
                                 if( restLength > 0 )
                                 {
                                     datalen = decompressBuffer( pBuffer, restLength );
-                                    if(datalen !=-1)
+                                   if(datalen !=-1)
                                     datalen += i+3;
                                 }
                                 i += 2;
+                                iac = false;
+                                insb = false;                                
                                 goto MAIN_LOOP_END;
                             }
                         }
