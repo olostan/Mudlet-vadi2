@@ -146,6 +146,7 @@ public:
     static int setRoomColor( lua_State * );
     static int getRoomCoordinates( lua_State * );
     static int setRoomCoordinates( lua_State * );
+    static int roomExists( lua_State * );
     static int addRoom( lua_State * );
     static int setExit( lua_State * );
     static int createRoomID( lua_State * );
