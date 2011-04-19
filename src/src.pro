@@ -5,8 +5,12 @@ QMAKE_CXXFLAGS_DEBUG += -O3 -Wno-deprecated -Wno-unused-parameter
 MOC_DIR = ./tmp
 OBJECTS_DIR = ./tmp
 QT += network opengl
-LIBLUA = -L/usr/local/lib -lluajit-5.1
-!exists(/usr/lib/liblua5.1.a):LIBLUA = -L/usr/local/lib -lluajit-5.1
+LIBLUA = -llua5.1
+!exists(/usr/lib/liblua5.1.a):LIBLUA = -llua
+
+# automatically link to LuaJIT if it exists
+exists(/usr/local/lib/libluajit-5.1.a):LIBLUA = -L/usr/local/lib -lluajit-5.1
+
 unix:LIBS += -lpcre \
     $$LIBLUA \
     -lyajl
