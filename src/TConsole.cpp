@@ -2150,12 +2150,12 @@ TLabel * TConsole::createLabel( QString & name, int x, int y, int width, int hei
         pC->setContentsMargins(0,0,0,0);
         pC->move( x, y );
         pC->show();
-   qDebug()<<"created new miniconsole name="<<name;
+        qDebug()<<"created new label name="<<name;
         return pC;
     }
     else
     {
-        qDebug()<<"ERROR: couldn't create miniconsole name="<<name;
+        qDebug()<<"ERROR: couldn't create label name="<<name;
         return 0;
     }
 }
