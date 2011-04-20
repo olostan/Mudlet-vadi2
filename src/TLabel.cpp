@@ -46,3 +46,30 @@ void TLabel::mousePressEvent( QMouseEvent * event )
 
     QWidget::mousePressEvent( event );
 }
+
+void TLabel::mouseMoveEvent( QMouseEvent * qevent )
+{
+    // locate our own name, a bit backwards through the map - not stored in the label object
+    if ( !mpHost || !mpHost->mpConsole )
+        return;
+
+    std::map<std::string, TLabel *>::const_iterator end = mpHost->mpConsole->mLabelMap.end();
+    for (std::map<std::string, TLabel *>::const_iterator it = mpHost->mpConsole->mLabelMap.begin(); it != end; ++it)
+    {
+        if (it->second == this) {
+            TEvent event;
+            event.mArgumentList.append( "sysWindowMouseMoveEvent" );
+            event.mArgumentList.append(QString(it->first.c_str()));
+            event.mArgumentTypeList.append(ARGUMENT_TYPE_STRING);
+            event.mArgumentTypeList.append(ARGUMENT_TYPE_STRING);
+            mpHost->raiseEvent( & event );
+
+            // do not accept and let it propagate, so all stacked labels can track this event
+            QWidget::mouseMoveEvent( qevent );
+            return;
+        }
+    }
+
+
+    QWidget::mouseMoveEvent( qevent );
+}

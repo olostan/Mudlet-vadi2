@@ -37,7 +37,8 @@ public:
 
                   TLabel( QWidget * pW=0 );
 void              setScript( Host * pHost, QString & func, TEvent * args ){ mpHost = pHost; mScript = func; mpParameters = args; }
-void              mousePressEvent( QMouseEvent *  );
+void              mousePressEvent( QMouseEvent * );
+void              mouseMoveEvent( QMouseEvent * );
 
 Host *            mpHost;
 QString           mScript;
