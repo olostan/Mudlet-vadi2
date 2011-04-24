@@ -310,6 +310,7 @@ public:
     static std::map<lua_State *, Host *> luaInterpreterMap;
     QMap<QNetworkReply *, QString> downloadMap;
 
+
 signals:
 
     void signalOpenUserWindow( int, QString );
