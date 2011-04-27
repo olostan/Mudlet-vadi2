@@ -128,6 +128,7 @@ public:
     bool               isAutologin(){ return mIsAutologin; }
     void               setReplacementCommand( QString );
     void               registerEventHandler( QString, TScript * );
+    void               registerAnonymousEventHandler( QString name, QString fun );
     void               unregisterEventHandler( QString, TScript * );
     void               raiseEvent( TEvent * event );
     void               resetProfile();
@@ -267,6 +268,7 @@ public:
     QColor             mBgColor_2;
     bool               mMapStrongHighlight;
     QStringList        mGMCP_merge_table_keys;
+    QMap<QString, QStringList> mAnonymousEventHandlerFunctions;
 
 private:
     Host();

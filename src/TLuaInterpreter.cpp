@@ -5362,12 +5362,12 @@ int TLuaInterpreter::setRoomUserData( lua_State * L )
         QString _key = key.c_str();
         QString _value = value.c_str();
         pHost->mpMap->rooms[roomID]->userData[_key] = _value;
-        return 0;
+        lua_pushboolean( L, true );
+        return 1;
     }
     else
     {
-        lua_pushstring( L, "getRoomUserData: no such roomID" );
-        lua_error( L );
+        lua_pushboolean( L, false );
         return 1;
     }
 }
@@ -6454,6 +6454,36 @@ int TLuaInterpreter::appendCmdLine( lua_State * L )
     return 0;
 }
 
+int TLuaInterpreter::registerAnonymousEventHandler( lua_State * L )
+{
+    string event;
+    if( ! lua_isstring( L, 1 ) )
+    {
+        lua_pushstring( L, "appendCmdLine(): wrong argument type" );
+        lua_error( L );
+        return 1;
+    }
+    else
+    {
+        event = lua_tostring( L, 1 );
+    }
+    string func;
+    if( ! lua_isstring( L, 2 ) )
+    {
+        lua_pushstring( L, "appendCmdLine(): wrong argument type" );
+        lua_error( L );
+        return 1;
+    }
+    else
+    {
+        func = lua_tostring( L, 2 );
+    }
+    Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
+    QString e = event.c_str();
+    QString f = func.c_str();
+    pHost->registerAnonymousEventHandler( e, f );
+    return 0;
+}
 
 
 int TLuaInterpreter::Send( lua_State * L )
@@ -7524,6 +7554,7 @@ void TLuaInterpreter::initLuaGlobals()
     lua_register( pGlobalLua, "getRoomUserData", TLuaInterpreter::getRoomUserData );
     lua_register( pGlobalLua, "setRoomUserData", TLuaInterpreter::setRoomUserData );
     lua_register( pGlobalLua, "getRoomsByPosition", TLuaInterpreter::getRoomsByPosition );
+    //lua_register( pGlobalLua, "dumpRoomUserData", TLuaInterpreter::dumpRoomUserData );
     lua_register( pGlobalLua, "clearRoomUserData", TLuaInterpreter::clearRoomUserData );
     lua_register( pGlobalLua, "downloadFile", TLuaInterpreter::downloadFile );
     lua_register( pGlobalLua, "appendCmdLine", TLuaInterpreter::appendCmdLine );
@@ -7536,6 +7567,7 @@ void TLuaInterpreter::initLuaGlobals()
     lua_register( pGlobalLua, "deleteArea", TLuaInterpreter::deleteArea );
     lua_register( pGlobalLua, "deleteRoom", TLuaInterpreter::deleteRoom );
     lua_register( pGlobalLua, "setRoomChar", TLuaInterpreter::setRoomChar );
+    lua_register( pGlobalLua, "registerAnonymousEventHandler", TLuaInterpreter::registerAnonymousEventHandler );
 
     luaopen_yajl(pGlobalLua);
     lua_setglobal( pGlobalLua, "yajl" );

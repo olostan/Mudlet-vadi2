@@ -952,6 +952,7 @@ void TConsole::printOnDisplay( std::string & incomingSocketData )
                     }
                     mLastBufferLogLine--;
                 }
+                mLogStream.flush();
             }
         }
     }
@@ -1247,7 +1248,7 @@ void TConsole::scrollDown( int lines )
 void TConsole::scrollUp( int lines )
 {
     console2->mIsTailMode = true;
-    console2->mCursorY = buffer.getLastLineNumber();
+    console2->mCursorY = buffer.size();//getLastLineNumber();
     console2->show();
     console2->forceUpdate();
     console->scrollUp( lines );
