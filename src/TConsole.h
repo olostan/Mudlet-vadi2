@@ -277,6 +277,10 @@ public:
       int               mLastBufferLogLine;
       bool              mIsPromptLine;
 
+private:
+      QString           readProfileData( QString profile, QString item );
+      void              writeProfileData( QString profile, QString item, QString what );
+
 signals:
 
 
