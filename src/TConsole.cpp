@@ -511,33 +511,6 @@ TConsole::TConsole( Host * pH, bool isDebugConsole, QWidget * parent )
     buttonLayer->setMaximumWidth(240);
     buttonMainLayer->setMinimumWidth(240);
     buttonMainLayer->setMaximumWidth(240);
-
-    // re-enable logging if it was disabled when profile closed
-    QString val = readProfileData( profile_name, "logging" );
-    if( val.toInt() )
-        logButton->click();
-}
-
-void TConsole::writeProfileData( QString profile, QString item, QString what )
-{
-    QFile file( QDir::homePath()+"/.config/mudlet/profiles/"+profile+"/"+item );
-    file.open( QIODevice::WriteOnly | QIODevice::Unbuffered );
-    QDataStream ofs( & file );
-    ofs << what;
-    file.close();
-}
-
-QString TConsole::readProfileData( QString profile, QString item )
-{
-    QFile file( QDir::homePath()+"/.config/mudlet/profiles/"+profile+"/"+item );
-    file.open( QIODevice::ReadOnly );
-    if( ! file.exists() ) return "";
-    QDataStream ifs( & file );
-    QString ret;
-
-    ifs >> ret;
-    file.close();
-    return ret;
 }
 
 void TConsole::setLabelStyleSheet( std::string & buf, std::string & sh )
@@ -662,10 +635,6 @@ void TConsole::closeEvent( QCloseEvent *event )
 
     if( profile_name != "default_host" )
     {
-        // save the logging preference regardless of profile save options
-        QString currently_logging = QString::number(mLogToLogFile);
-        writeProfileData( profile_name, "logging", currently_logging);
-
         if( mpHost->mFORCE_SAVE_ON_EXIT )
         {
             QString directory_xml = QDir::homePath()+"/.config/mudlet/profiles/"+profile_name+"/current";
