@@ -89,7 +89,7 @@ void T2DMap::init()
             mPixMap[j]=b;
         }
     }
-    // bilder aller grid areas erzeugen
+    // generate images of all grid areas
     QList<int> kL = mpMap->areas.keys();
     for( int i=0; i<kL.size(); i++ )
     {
@@ -863,6 +863,15 @@ void T2DMap::mouseReleaseEvent(QMouseEvent * e )
         mMultiRect = QRect(0,0,0,0);
         update();
     }
+}
+
+// FIXME - doesn't quite work. Should unhighlight all highlighted rooms
+void T2DMap::deselect()
+{
+    mMultiSelection = false;
+    mMultiRect = QRect(0,0,0,0);
+    update();
+    repaint();
 }
 
 void T2DMap::mousePressEvent(QMouseEvent *event)

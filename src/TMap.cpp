@@ -922,20 +922,29 @@ bool TMap::serialize( QDataStream & ofs )
 
 #include <QDir>
 
-bool TMap::restore()
+bool TMap::restore(QString location)
 {
+    QString folder;
+    QStringList entries;
     qDebug()<<"RESTORING MAP";
-    QString folder = QDir::homePath()+"/.config/mudlet/profiles/"+mpHost->getName()+"/map/";
-    QDir dir( folder );
-    dir.setSorting(QDir::Time);
-    QStringList entries = dir.entryList( QDir::Files, QDir::Time );
-    for( int i=0;i<entries.size(); i++ )
-        qDebug()<<i<<"#"<<entries[i];
+
+    if (location == "") {
+        folder = QDir::homePath()+"/.config/mudlet/profiles/"+mpHost->getName()+"/map/";
+        QDir dir( folder );
+        dir.setSorting(QDir::Time);
+        entries = dir.entryList( QDir::Files, QDir::Time );
+        for( int i=0;i<entries.size(); i++ )
+            qDebug()<<i<<"#"<<entries[i];
+    }
+
     bool canRestore = true;
-    if( entries.size() > 0 )
+    if( entries.size() > 0 || location != "")
     {
-        QFile file(folder+entries[0]);
-        file.open( QFile::ReadOnly );
+        QFile file((location == "") ? folder+entries[0] : location);
+
+        if (!file.open( QFile::ReadOnly ))
+            return false;
+
         qDebug()<<"[LOADING MAP]:"<<file.fileName();
         QDataStream ifs( & file );
         int version;

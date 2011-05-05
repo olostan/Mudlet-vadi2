@@ -43,6 +43,7 @@ public:
     void     mouseMoveEvent( QMouseEvent * event );
     void     mouseReleaseEvent(QMouseEvent * e );
     int      getTopLeftSelection();
+    void     deselect();
     TMap *   mpMap;
     Host *   mpHost;
     int      xzoom;

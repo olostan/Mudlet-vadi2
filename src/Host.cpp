@@ -147,7 +147,7 @@ Host::Host( int port, QString hostname, QString login, QString pass, int id )
     mErrorLogFile.setFileName( logFileName );
     mErrorLogFile.open( QIODevice::Append );
     mErrorLogStream.setDevice( &mErrorLogFile );
-    mpMap->restore();
+    mpMap->restore("");
     mpMap->init( this );
     mMapStrongHighlight = false;
     mGMCP_merge_table_keys.append("Char.Status");
@@ -260,7 +260,7 @@ Host::Host()
     mErrorLogFile.setFileName( logFileName );
     mErrorLogFile.open( QIODevice::Append );
     mErrorLogStream.setDevice( &mErrorLogFile );
-    mpMap->restore();
+    mpMap->restore("");
     mpMap->init( this );
     mMapStrongHighlight = false;
     mGMCP_merge_table_keys.append("Char.Status");

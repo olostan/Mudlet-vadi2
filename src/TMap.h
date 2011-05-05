@@ -69,7 +69,7 @@ public:
     bool gotoRoom( int, int );
     void setView( float, float, float, float );
     bool serialize( QDataStream & );
-    bool restore();
+    bool restore(QString location);
     QMap<int, TRoom *> rooms;
     QMap<int, TArea *> areas;
     QMap<int, QString> areaNamesMap;
