@@ -278,6 +278,8 @@ public:
       TSplitter *       splitter;
       int               mLastBufferLogLine;
       bool              mIsPromptLine;
+      QToolButton *     logButton;
+      bool              mUserAgreedToCloseConsole;
 
 signals:
 
