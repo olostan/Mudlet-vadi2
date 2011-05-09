@@ -68,6 +68,13 @@ dlgNotepad.cpp
 THighlighter.cpp
 dlgComposer.cpp
 TBuffer.cpp
+TMap.cpp
+TRoom.cpp
+dlgMapper.cpp
+T2DMap.cpp
+TArea.cpp
+dlgRoomExits.cpp
+glwidget.cpp
 )
 
 SET(mudlet_UIS 
@@ -94,6 +101,9 @@ ui/notes_editor.ui
 ui/trigger_pattern_edit.ui
 ui/composer.ui
 ui/profile_preferences.ui
+ui/mapper.ui
+ui/irc.ui
+ui/room_exits.ui
 )
 
 SET(mudlet_MOC_HDRS 
@@ -156,6 +166,10 @@ mudlet.h
     THighlighter.h
     dlgComposer.h
     Tree.h
+    dlgRoomExits.h
+    T2DMap.h
+    dlgMapper.h
+    glwidget.h
 )
 
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -167,6 +181,10 @@ INCLUDE(../MudletCPack.cmake) # Use CPack
 INCLUDE(${QT_USE_FILE})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${mudlet_BINARY_DIR} ${QSCINTILLA_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${PCRE_INCLUDE_DIR})
 
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  ADD_DEFINITIONS(${CMAKE_CXX_FLAGS} "-Wno-deprecated  -DUNICODE  -D_UNICODE")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
 QT4_AUTOMOC(${mudlet_SRCS})
 QT4_WRAP_UI(mudlet_UIS_H ${mudlet_UIS})
 QT4_WRAP_CPP(mudlet_MOC_SRCS ${mudlet_MOC_HDRS})
@@ -174,7 +192,7 @@ QT4_ADD_RESOURCES(mudlet_RCC_SRCS ${mudlet_RCCS})
 
 add_executable(mudlet WIN32 ${mudlet_SRCS} ${mudlet_UIS_H} ${mudlet_MOC_SRCS} ${mudlet_RCC_SRCS})
 
-TARGET_LINK_LIBRARIES(mudlet ${QT_LIBRARIES} ${LUA_LIBRARIES} ${ZLIB_LIBRARIES} ${PCRE_LIBRARIES})
+TARGET_LINK_LIBRARIES(mudlet ${QT_LIBRARIES} ${LUA_LIBRARIES} ${ZLIB_LIBRARIES} ${PCRE_LIBRARIES} libyajl.so libhunspell.so libQtUiTools.so libQtOpenGL.so libGLU.so)
 
 install( PROGRAMS mudlet DESTINATION "/usr/local/bin" )
 install( FILES LuaGlobal.lua mudlet_documentation.html fonts/ttf-bitstream-vera-1.10/COPYRIGHT.TXT fonts/ttf-bitstream-vera-1.10/local.conf fonts/ttf-bitstream-vera-1.10/README.TXT fonts/ttf-bitstream-vera-1.10/RELEASENOTES.TXT fonts/ttf-bitstream-vera-1.10/VeraBd.ttf fonts/ttf-bitstream-vera-1.10/VeraBI.ttf fonts/ttf-bitstream-vera-1.10/VeraIt.ttf fonts/ttf-bitstream-vera-1.10/VeraMoBd.ttf fonts/ttf-bitstream-vera-1.10/VeraMoBI.ttf fonts/ttf-bitstream-vera-1.10/VeraMoIt.ttf fonts/ttf-bitstream-vera-1.10/VeraMono.ttf fonts/ttf-bitstream-vera-1.10/VeraSeBd.ttf fonts/ttf-bitstream-vera-1.10/VeraSe.ttf fonts/ttf-bitstream-vera-1.10/Vera.ttf DESTINATION "/usr/local/share/mudlet" )

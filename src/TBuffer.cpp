@@ -800,7 +800,7 @@ inline int TBuffer::lookupColor( QString & s, int pos )
 }
 
 
-void TBuffer::translateToPlainText( std::string & s )
+void TBuffer::translateToPlainText( QString & s )
 {
     speedAppend = 0;
     speedTP = 0;
@@ -821,7 +821,8 @@ void TBuffer::translateToPlainText( std::string & s )
         {
             return;
         }
-        const char & ch = s[msPos];
+        //const char & ch = s[msPos];
+        QCharRef ch = s[msPos];
         if( ch == '\033' )
         {
             gotESC = true;

@@ -933,7 +933,7 @@ void TConsole::loadRawFile( std::string n )
     mpHost->mTelnet.loadReplay( fileName );
 }
 
-void TConsole::printOnDisplay( std::string & incomingSocketData )
+void TConsole::printOnDisplay( QString & incomingSocketData )
 {
     //buffer.messen();
     QString prompt ="";//FIXME
@@ -1584,21 +1584,6 @@ bool TConsole::saveMap(QString location)
     return true;
 }
 
-bool TConsole::loadMap(QString location)
-{
-    if (!mpHost || !mpHost->mpMap || !mpHost->mpMap->mpMapper)
-        return false;
-
-    mpHost->mpMap->restore(location);
-    mpHost->mpMap->init( mpHost );
-    mpHost->mpMap->mpMapper->mp2dMap->init();
-    mpHost->mpMap->mpMapper->show();
-    
-    // previous selections stay, so we need to clear it
-    mpHost->mpMap->mpMapper->mp2dMap->deselect();
-    return true;
-}
-
 bool TConsole::deleteLine( int y )
 {
     return buffer.deleteLine( y );
@@ -1827,7 +1812,7 @@ QString TConsole::getCurrentLine( std::string & buf )
     if( mSubConsoleMap.find( key ) != mSubConsoleMap.end() )
     {
         TConsole * pC = mSubConsoleMap[key];
-        if( ! pC ) return false;
+        if( ! pC ) return QString("");
         return pC->getCurrentLine();
     }
     else
@@ -2201,12 +2186,12 @@ TLabel * TConsole::createLabel( QString & name, int x, int y, int width, int hei
         pC->setContentsMargins(0,0,0,0);
         pC->move( x, y );
         pC->show();
-        qDebug()<<"created new label name="<<name;
+   qDebug()<<"created new miniconsole name="<<name;
         return pC;
     }
     else
     {
-        qDebug()<<"ERROR: couldn't create label name="<<name;
+        qDebug()<<"ERROR: couldn't create miniconsole name="<<name;
         return 0;
     }
 }

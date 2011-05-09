@@ -155,17 +155,20 @@ bool TTrigger::setRegexCodeList( QStringList regexList, QList<int> propertyList 
         if( propertyList[i] == REGEX_PERL )
         {
             const char *error;
-            char * pattern = (char *) malloc( strlen( regexList[i].toLocal8Bit().data() ) + 48 );
-            strcpy( pattern, regexList[i].toLocal8Bit().data() );
+            const char *pstr = regexList[i].toUtf8().data();
+            char * pattern = (char *) malloc( strlen( pstr ) + 48 );
+            strcpy( pattern, pstr );
 
             int erroffset;
 
             pcre * re;
+            setlocale(LC_CTYPE, "ru_RU");
+            const unsigned char* tables = pcre_maketables();
             re = pcre_compile( pattern,
-                               0,
+                               PCRE_UTF8,
                                &error,
                                &erroffset,
-                               0 );
+                               tables );
 
             if (re == 0)
             {

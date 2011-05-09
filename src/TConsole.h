@@ -147,7 +147,7 @@ public:
       void              print( const char * );
       void              printDebug( QColor &, QColor &, QString & );
       void              printSystemMessage( QString & msg );
-      void              printOnDisplay( std::string & );
+      void              printOnDisplay( QString & );
       void              printCommand( QString & );
       bool              hasSelection();
       void              moveCursorEnd();
@@ -182,7 +182,6 @@ public:
       QString           getCurrentLine();
       void              selectCurrentLine();
       bool              saveMap(QString location);
-      bool              loadMap(QString location);
       QString           logger_translate( QString & );
       void              logger_set_text_properties( QString );
       QString           assemble_html_font_specs();

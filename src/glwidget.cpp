@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include <QtGui>
-#include <QtOpenGL>
+#include <QtOpenGL/QtOpenGL>
 
 #include <math.h>
 #include <QDebug>

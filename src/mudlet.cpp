@@ -28,7 +28,7 @@
 #include <QTextStream>
 #include <QCloseEvent>
 #include <QFileDialog>
-#include <QtUiTools>
+#include <QtUiTools/QtUiTools>
 #include "ctelnet.h"
 #include "dlgConnectionProfiles.h"
 #include "dlgTriggerEditor.h"
@@ -41,7 +41,7 @@
 #include "EAction.h"
 #include "TTextEdit.h"
 #include "dlgNotepad.h"
-#include "dlgIRC.h"
+//#include "dlgIRC.h"
 
 //#define NDEBUG
 #include <assert.h>
@@ -1514,13 +1514,14 @@ void mudlet::slot_notes()
 
 void mudlet::slot_irc()
 {
+/*
     if( ! mpIRC )
     {
         mpIRC = new dlgIRC();
         mpIRC->setWindowTitle( "Mudlet live IRC Help Channel #mudlet-help on irc.freenode.net" );
     }
     mpIRC->raise();
-    mpIRC->show();
+    mpIRC->show();*/
 }
 
 void mudlet::slot_reconnect()
