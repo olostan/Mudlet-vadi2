@@ -1342,6 +1342,31 @@ int TLuaInterpreter::saveMap( lua_State * L )
     return 1;
 }
 
+int TLuaInterpreter::loadMap( lua_State * L )
+{
+    string location="";
+    if( lua_gettop( L ) == 1 )
+    {
+        if( ! lua_isstring( L, 1 ) )
+        {
+            lua_pushstring( L, "loadMap: where do you want to load from?" );
+            lua_error( L );
+            return 1;
+        }
+        else
+        {
+            location = lua_tostring( L, 1 );
+        }
+    }
+
+    QString _location( location.c_str() );
+    Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
+
+    bool error = pHost->mpConsole->loadMap(_location);
+    lua_pushboolean( L, error );
+    return 1;
+}
+
 // enableTimer( sess, timer_name )
 int TLuaInterpreter::enableTimer( lua_State *L )
 {
@@ -7595,6 +7620,7 @@ void TLuaInterpreter::initLuaGlobals()
     lua_register( pGlobalLua, "setRoomChar", TLuaInterpreter::setRoomChar );
     lua_register( pGlobalLua, "registerAnonymousEventHandler", TLuaInterpreter::registerAnonymousEventHandler );
     lua_register( pGlobalLua, "saveMap", TLuaInterpreter::saveMap );
+    lua_register( pGlobalLua, "loadMap", TLuaInterpreter::loadMap );
 
     luaopen_yajl(pGlobalLua);
     lua_setglobal( pGlobalLua, "yajl" );
