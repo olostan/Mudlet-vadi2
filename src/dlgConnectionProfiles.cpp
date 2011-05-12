@@ -174,7 +174,7 @@ void dlgConnectionProfiles::slot_update_url( const QString url )
             notificationAreaIconLabelError->show();
             notificationAreaIconLabelInformation->hide();
             notificationAreaMessageBox->show();
-            notificationAreaMessageBox->setText( QString("Please enter the URL or IP address of the MUD server.")+check.errorString() );
+            notificationAreaMessageBox->setText( QString("Please enter the URL or IP address of the MUD server.\n\n")+check.errorString() );
         }
     }
 }
