@@ -795,7 +795,27 @@ void dlgConnectionProfiles::slot_item_clicked(QListWidgetItem *pItem)
         dir.setSorting(QDir::Time);
         QStringList entries = dir.entryList( QDir::Files, QDir::Time );
 
-        profile_history->insertItems( 1, entries );
+        for (int i = 0; i < entries.size(); ++i) {
+            QRegExp rx("(\\d+)\\-(\\d+)\\-(\\d+)#(\\d+)\\-(\\d+)\\-(\\d+).xml");
+            if( rx.indexIn(entries.at(i)) != -1 )
+            {
+                QString day = rx.cap(1);
+                QString month = rx.cap(2);
+                QString year = rx.cap(3);
+                QString hour = rx.cap(4);
+                QString minute = rx.cap(5);
+                QString second = rx.cap(6);
+
+                QDateTime datetime;
+                datetime.setTime(QTime (hour.toInt(), minute.toInt(), second.toInt()));
+                datetime.setDate(QDate (year.toInt(), month.toInt(), day.toInt()));
+
+                //readableEntries << datetime.toString(Qt::SystemLocaleLongDate);
+                profile_history->addItem(datetime.toString(Qt::SystemLocaleLongDate), QVariant(entries.at(i)));
+            } else
+                profile_history->addItem(entries.at(i), QVariant(entries.at(i))); // if it has a custom name, use it as it is
+
+        }
 
     }
 }
@@ -1103,7 +1123,7 @@ void dlgConnectionProfiles::slot_connectToServer()
         qDebug()<<i<<"#"<<entries[i];
     if( entries.size() > 0 )
     {
-        QFile file(folder+"/"+profile_history->currentText());   //entries[0]);
+        QFile file(folder+"/"+profile_history->itemData(profile_history->currentIndex()).toString());   //entries[0]);
         file.open(QFile::ReadOnly | QFile::Text);
         XMLimport importer( pHost );
         qDebug()<<"[LOADING PROFILE]:"<<file.fileName();

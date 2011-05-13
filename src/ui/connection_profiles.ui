@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>718</width>
-    <height>579</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -494,7 +494,6 @@ p, li { white-space: pre-wrap; }
              <widget class="QLineEdit" name="profile_name_entry">
               <property name="font">
                <font>
-                <family>Bitstream Charter</family>
                 <pointsize>9</pointsize>
                </font>
               </property>
@@ -525,7 +524,6 @@ p, li { white-space: pre-wrap; }
               </property>
               <property name="font">
                <font>
-                <family>Bitstream Charter</family>
                 <pointsize>9</pointsize>
                </font>
               </property>
@@ -559,7 +557,6 @@ p, li { white-space: pre-wrap; }
               </property>
               <property name="font">
                <font>
-                <family>Bitstream Charter</family>
                 <pointsize>9</pointsize>
                </font>
               </property>
