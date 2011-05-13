@@ -6995,6 +6995,7 @@ void TLuaInterpreter::setGMCPTable(QString & key, QString & string_data)
         {
             QString title = rx.cap(1);
             QString initialText = rx.cap(2);
+            initialText.replace(QString("\\n"), QString("\n"));
             Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
             if( pHost->mTelnet.mpComposer ) return;
             pHost->mTelnet.mpComposer = new dlgComposer( pHost );
