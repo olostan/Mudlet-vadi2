@@ -5121,7 +5121,7 @@ int TLuaInterpreter::addRoom( lua_State * L )
     int id;
     if( ! lua_isnumber( L, 1 ) )
     {
-        lua_pushstring( L, "getRoomArea: wrong argument type" );
+        lua_pushstring( L, "addRoom: wrong argument type" );
         lua_error( L );
         return 1;
     }
@@ -7624,7 +7624,7 @@ void TLuaInterpreter::initLuaGlobals()
 
     QString n;
     int error;
-    
+
     // if using LuaJIT, adjust the cpath to look in /usr/lib as well - it doesn't by default
     luaL_dostring (pGlobalLua, "if jit then package.cpath = package.cpath .. ';/usr/lib/lua/5.1/?.so;' end");
 
