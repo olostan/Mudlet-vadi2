@@ -28,6 +28,7 @@
 #include "Host.h"
 #include "TConsole.h"
 #include <QPixmap>
+#include <QtUiTools>
 
 T2DMap::T2DMap()
 {
@@ -959,12 +960,12 @@ void T2DMap::mousePressEvent(QMouseEvent *event)
         popup->addAction( action10 );
         popup->addAction( action11 );
         popup->addAction( action4 );
+        popup->addAction( action9 );
         popup->addAction( action5 );
         popup->addAction( action6 );
         popup->addAction( action7 );
         popup->addAction( action2 );
 
-        popup->addAction( action9 );
         popup->addAction( action13 );
 
         popup->popup( mapToGlobal( event->pos() ) );
@@ -1079,7 +1080,7 @@ void T2DMap::slot_setCharacter()
 {
     if( mpHost->mpMap->rooms.contains( mRoomSelection ) )
     {
-        QString s = QInputDialog::getText(this,"enter marker letter","letter");
+        QString s = QInputDialog::getText(this,"Enter marker letter","Letter to show on the room:");
         if( s.size() < 1 ) return;
         mpHost->mpMap->rooms[mRoomSelection]->c = s[0].toAscii();
         repaint();
@@ -1132,6 +1133,7 @@ void T2DMap::slot_changeColor()
 {
     mChosenRoomColor = 5;
     QDialog * pD = new QDialog(this);
+    pD->setWindowTitle("Choose a new room color");
     QVBoxLayout * pL = new QVBoxLayout;
     pD->setLayout( pL );
     pD->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -1149,7 +1151,7 @@ void T2DMap::slot_changeColor()
     pButtonBar->setLayout( pL2 );
     pButtonBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     QPushButton * pB_newColor = new QPushButton(pButtonBar);
-    pB_newColor->setText("define new color");
+    pB_newColor->setText("Define new color");
 
     connect(pB_newColor, SIGNAL(clicked()), pD, SLOT(reject()));
     connect(pB_newColor, SIGNAL(clicked()), this, SLOT(slot_defineNewColor()));
@@ -1157,12 +1159,12 @@ void T2DMap::slot_changeColor()
     pL2->addWidget(pB_newColor);
 
     QPushButton * pB_ok = new QPushButton(pButtonBar);
-    pB_ok->setText("ok");
+    pB_ok->setText("OK");
     pL2->addWidget(pB_ok);
     connect(pB_ok, SIGNAL(clicked()), pD, SLOT(accept()));
 
     QPushButton * pB_abort = new QPushButton(pButtonBar);
-    pB_abort->setText("abort");
+    pB_abort->setText("Cancel");
     connect(pB_abort, SIGNAL(clicked()), pD, SLOT(reject()));
     pL2->addWidget(pB_abort);
     pL->addWidget(pButtonBar);
@@ -1181,6 +1183,7 @@ void T2DMap::slot_changeColor()
         pI->setIcon(mi);
         pI->setText(QString::number(it.key()));
         pLW->addItem(pI);
+        // TODO - auto-select current colour if 1 room is chosen
     }
 
     pD->exec();
@@ -1220,7 +1223,7 @@ void T2DMap::slot_changeColor()
 
 void T2DMap::slot_spread()
 {
-    int _spread = QInputDialog::getInt(this, "set grid","grid:",5);
+    int _spread = QInputDialog::getInt(this, "Spread out the selected rooms","Increase exit lengths by:",5);
     if( mMultiSelection )
     {
         mMultiRect = QRect(0,0,0,0);
@@ -1238,7 +1241,7 @@ void T2DMap::slot_spread()
 
 void T2DMap::slot_shrink()
 {
-    int _spread = QInputDialog::getInt(this, "shrink grid",":",3);
+    int _spread = QInputDialog::getInt(this, "Shrink the selected rooms","Decrease exit lengths by:",3);
     if( mMultiSelection )
     {
         mMultiRect = QRect(0,0,0,0);
@@ -1324,9 +1327,49 @@ void T2DMap::slot_setRoomWeight()
 
 void T2DMap::slot_setArea()
 {
+    QUiLoader loader;
+    int currentarea = 0;
+
+    QFile file(":/ui/set_room_area.ui");
+    file.open(QFile::ReadOnly);
+
+    QDialog *set_room_area_dialog = dynamic_cast<QDialog *>(loader.load(&file, this));
+    file.close();
+
+    if( !mMultiSelection && mpHost->mpMap->rooms.contains(mRoomSelection) )
+    {
+        currentarea = mpHost->mpMap->rooms[mRoomSelection]->area;
+    }
+
+    if (set_room_area_dialog) {
+        arealist_combobox = set_room_area_dialog->findChild<QComboBox*>("arealist_combobox");
+
+        if (!arealist_combobox) return;
+        connect(set_room_area_dialog, SIGNAL(accepted()), this, SLOT(slot_moveArea()));
+
+        int i = 1;
+        QMapIterator<int, QString> it( mpMap->areaNamesMap );
+        while( it.hasNext() )
+        {
+            it.next();
+            int areaID = it.key();
+            arealist_combobox->addItem(QString(it.value() + " ("+QString::number(areaID)+")"), QVariant(areaID));
+            if (currentarea == areaID)
+                i = arealist_combobox->count();
+        }
+        arealist_combobox->setCurrentIndex(i - 1);
+
+        set_room_area_dialog->show();
+        set_room_area_dialog->raise();
+        set_room_area_dialog->activateWindow();
+     }
+}
+
+void T2DMap::slot_moveArea() {
+    int w = arealist_combobox->itemData(arealist_combobox->currentIndex()).toInt();
+
     if( mMultiSelection )
     {
-        int w = QInputDialog::getInt(this,"Enter the area ID:", "area ID:", 1);
         mMultiRect = QRect(0,0,0,0);
         for( int j=0; j<mMultiSelectionList.size(); j++ )
         {
@@ -1341,13 +1384,10 @@ void T2DMap::slot_setArea()
     {
         if( mpHost->mpMap->rooms.contains(mRoomSelection) )
         {
-            int _w = mpHost->mpMap->rooms[mRoomSelection]->area;
-            int w = QInputDialog::getInt(this, "Enter area ID:","area ID:",_w);
             mpHost->mpMap->rooms[mRoomSelection]->area = w;
         }
     }
 }
-
 
 void T2DMap::mouseMoveEvent( QMouseEvent * event )
 {

@@ -76,6 +76,7 @@ public:
     QMap<int,QPixmap> mPixMap;
     QMap<int, QPixmap *> mGridPix;
     int      gzoom;
+    QComboBox * arealist_combobox;
 
 signals:
 
@@ -96,6 +97,7 @@ public slots:
     void slot_lockRoom();
     void slot_setRoomWeight();
     void slot_setArea();
+    void slot_moveArea();
 };
 
 #endif // T2DMAP_H
