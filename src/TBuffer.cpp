@@ -1325,7 +1325,8 @@ void TBuffer::translateToPlainText( QString & s )
         }
         const QString nothing = "";
         TChar stdCh;
-        if( ( ch == '\n' ) || ( ch == '\xff') || ( ch == '\r' ) )
+//      if (ch.unicode()>255) cout<<"[UC="<<ch.unicode()<<"]"; // for debugging unicode chars
+        if( ( ch == '\n' ) || ( ch.unicode()==65533 ) || ( ch == '\r' ))
         {
             // MUD Zeilen werden immer am Zeilenanfang geschrieben
             if( lineBuffer.back().size() > 0 )
@@ -1346,7 +1347,7 @@ void TBuffer::translateToPlainText( QString & s )
                 buffer.push_back( mMudBuffer );
                 dirty << true;
                 timeBuffer << (QTime::currentTime()).toString("hh:mm:ss.zzz") + "   ";
-                if( ch == '\xff' )
+                if( ch.unicode() == 65533 )
                 {
                     promptBuffer.append( true );
                 }
@@ -1373,7 +1374,7 @@ void TBuffer::translateToPlainText( QString & s )
                 buffer.back() = mMudBuffer;
                 dirty.back() = true;
                 timeBuffer.back() = QTime::currentTime().toString("hh:mm:ss.zzz") + "   ";
-                if( ch == '\xff' )
+                if( ch.unicode() == 65533 )
                 {
                     promptBuffer.back() = true ;
                 }
