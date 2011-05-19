@@ -1169,6 +1169,7 @@ void T2DMap::slot_changeColor()
     pL2->addWidget(pB_abort);
     pL->addWidget(pButtonBar);
 
+    QListWidgetItem **toSelect;
     QMapIterator<int, QColor> it(mpMap->customEnvColors);
     while( it.hasNext() )
     {
@@ -1183,8 +1184,41 @@ void T2DMap::slot_changeColor()
         pI->setIcon(mi);
         pI->setText(QString::number(it.key()));
         pLW->addItem(pI);
-        // TODO - auto-select current colour if 1 room is chosen
+
+        // determine which colour to auto-select, if any
+        // doesn't work yet because we're comparing normal colours to custom,
+        // or somesuch - environment values at below ten, it.key values at 250+
+        if( mMultiSelection )
+        {
+            if( mMultiSelectionList.size() < 1 )
+            {
+                mMultiSelectionList.push_back( mRoomSelection );
+            }
+
+            mMultiRect = QRect(0,0,0,0);
+            for( int j=0; j<mMultiSelectionList.size(); j++ )
+            {
+                if( mpMap->rooms.contains( mMultiSelectionList[j] &&
+                                          mpHost->mpMap->rooms[mMultiSelectionList[j]]->environment == it.key()))
+                {
+                    toSelect = &pI;
+                    break;
+                }
+            }
+
+            if( mMultiSelectionList.size() == 1 )
+                if( mMultiSelectionList[0] == mRoomSelection )
+                    mMultiSelectionList.clear();
+
+        }
+        else if( mpHost->mpMap->rooms.contains( mRoomSelection ) && mpHost->mpMap->rooms[mRoomSelection]->environment == it.key())
+        {
+            toSelect = &pI;
+        }
     }
+
+    if (*toSelect)
+        pLW->setCurrentItem(*toSelect);
 
     pD->exec();
     if( mMultiSelection )
