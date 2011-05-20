@@ -66,7 +66,6 @@ dlgMapper::dlgMapper( QWidget * parent, Host * pH, TMap * pM )
     panel->setFont(QApplication::font()); // set the default font of the buttons to be default.
     // They're overridden with a Monospace font somewhere else otherwise
 
-    QLayout *layout = entry_and_list->layout();
     glWidget->hide();
     buttons_3d->setVisible(false);
 
