@@ -606,11 +606,15 @@ void dlgTriggerEditor::slot_viewStatsAction()
 
 void dlgTriggerEditor::slot_viewErrorsAction()
 {
-    if( frame_4->isHidden() )frame_4->show();
-    else
+    if( frame_4->isHidden() ) {
+        frame_4->show();
+        mpErrorConsole->show();
+        popupArea->show();
+    } else {
         frame_4->hide();
-    mpErrorConsole->show();
-    popupArea->show();
+        mpErrorConsole->hide();
+        popupArea->hide();
+    }
 }
 
 
