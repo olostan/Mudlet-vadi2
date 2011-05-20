@@ -33,7 +33,7 @@ unix: {
     SHARE_DIR = /usr/local/share/mudlet
     BIN_DIR = $$INSTALL_PREFIX/bin
 }
-INCLUDEPATH += irc/include
+INCLUDEPATH += irc/include += qtwidgets
 SOURCES += TConsole.cpp \
     ctelnet.cpp \
     main.cpp \
@@ -106,7 +106,9 @@ SOURCES += TConsole.cpp \
     irc/src/ircutil.cpp \
     dlgIRC.cpp \
     T2DMap.cpp \
-    dlgRoomExits.cpp
+    dlgRoomExits.cpp \
+    qtwidgets/fancylineedit.cpp \
+    qtwidgets/filterlineedit.cpp
 
 
 HEADERS += mudlet.h \
@@ -181,7 +183,9 @@ HEADERS += mudlet.h \
     irc/include/ircutil.h \
     dlgIRC.h \
     T2DMap.h \
-    dlgRoomExits.h
+    dlgRoomExits.h \
+    qtwidgets/fancylineedit.h \
+    qtwidgets/filterlineedit.h
 
 FORMS += ui/connection_profiles.ui \
     ui/main_window.ui \

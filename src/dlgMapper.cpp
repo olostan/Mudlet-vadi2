@@ -38,6 +38,7 @@ dlgMapper::dlgMapper( QWidget * parent, Host * pH, TMap * pM )
     strongHighlight->setCheckState( mpHost->mMapStrongHighlight ? Qt::Checked : Qt::Unchecked );
     searchList->setSelectionMode( QAbstractItemView::SingleSelection );
     connect(roomID, SIGNAL(returnPressed()), this, SLOT(goRoom()));
+    connect(roomID, SIGNAL(filterChanged(const QString&)), this, SLOT(searchItems(const QString&)));
     connect(ortho, SIGNAL(pressed()), glWidget, SLOT(fullView()));
     connect(singleLevel, SIGNAL(pressed()), glWidget, SLOT(singleView()));
     connect(increaseTop, SIGNAL(pressed()), glWidget, SLOT(increaseTop()));
@@ -46,8 +47,8 @@ dlgMapper::dlgMapper( QWidget * parent, Host * pH, TMap * pM )
     connect(reduceBottom, SIGNAL(pressed()), glWidget, SLOT(reduceBottom()));
     connect(searchList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(choseRoom(QListWidgetItem*)));
 
-    connect(defaultView, SIGNAL(pressed()), glWidget, SLOT(defaultView()));
-    connect(dim2,SIGNAL(pressed()), this, SLOT(show2dView()));
+    connect(view_2d_3d,SIGNAL(currentIndexChanged(const QString&)), this, SLOT(show2dView(const QString&)));
+    connect(view_2d_3d,SIGNAL(currentIndexChanged(const QString&)), this, SLOT(hide3Dbuttons(const QString&)));
     connect(sideView, SIGNAL(pressed()), glWidget, SLOT(sideView()));
     connect(topView, SIGNAL(pressed()), glWidget, SLOT(topView()));
     connect(togglePanel, SIGNAL(pressed()), this, SLOT(slot_togglePanel()));
@@ -62,7 +63,13 @@ dlgMapper::dlgMapper( QWidget * parent, Host * pH, TMap * pM )
     showRoomIDs->setChecked(Qt::Unchecked);
     connect(showRoomIDs, SIGNAL(stateChanged(int)), this, SLOT(slot_toggleShowRoomIDs(int)));
     mp2dMap->mFontHeight = QFontMetrics( mpHost->mDisplayFont ).height();
+    panel->setFont(QApplication::font()); // set the default font of the buttons to be default.
+    // They're overridden with a Monospace font somewhere else otherwise
+
+    QLayout *layout = entry_and_list->layout();
     glWidget->hide();
+    buttons_3d->setVisible(false);
+
     mpMap->customEnvColors[257] = mpHost->mRed_2;
     mpMap->customEnvColors[258] = mpHost->mGreen_2;
     mpMap->customEnvColors[259] = mpHost->mYellow_2;
@@ -100,10 +107,15 @@ void dlgMapper::slot_togglePanel()
     panel->setVisible(!panel->isVisible());
 }
 
-void dlgMapper::show2dView()
+void dlgMapper::show2dView(const QString& view)
 {
-    glWidget->setVisible(!glWidget->isVisible());
-    mp2dMap->setVisible(!mp2dMap->isVisible());
+    glWidget->setVisible(view == "3D view" ? true : false);
+    mp2dMap->setVisible(view == "2D view" ? true: false);
+}
+
+void dlgMapper::hide3Dbuttons(const QString &view)
+{
+    buttons_3d->setVisible(view == "3D view" ? true : false);
 }
 
 void dlgMapper::downloadMap()
@@ -195,11 +207,12 @@ void dlgMapper::choseRoom(QListWidgetItem * pT )
 void dlgMapper::goRoom()
 {
     QString txt = roomID->text();
-    searchList->clear();
     int id = txt.toInt();
 
     if( id != 0 && mpMap->rooms.contains( id ) )
     {
+        searchList->clear();
+
         mpMap->mTargetID = id;
         if( mpMap->findPath(0,0) )
         {
@@ -212,20 +225,31 @@ void dlgMapper::goRoom()
             msgBox.setText("Cannot find a path to this room using regular exits.#1\n");
             msgBox.exec();
         }
+        mpHost->mpConsole->setFocus();
     }
     else
     {
-        QMapIterator<int, TRoom *> it( mpMap->rooms );
-        while( it.hasNext() )
+        searchItems("");
+    }
+}
+
+void dlgMapper::searchItems(const QString& entry)
+{
+    QString txt = entry == "" ? roomID->text() : entry;
+    searchList->clear();
+
+    QMapIterator<int, TRoom *> it( mpMap->rooms );
+    while( it.hasNext() )
+    {
+        it.next();
+        int i = it.key();
+        if( mpMap->rooms[i]->name.contains( txt, Qt::CaseInsensitive ) )
         {
-            it.next();
-            int i = it.key();
-            if( mpMap->rooms[i]->name.contains( txt, Qt::CaseInsensitive ) )
-            {
-                qDebug()<<"inserting match:"<<i;
-                searchList->addItem( mpMap->rooms[i]->name );
-            }
+            searchList->addItem( mpMap->rooms[i]->name );
         }
     }
-    mpHost->mpConsole->setFocus();
+
+    // if we pressed enter, send focus back to input line
+    if (entry == "")
+        mpHost->mpConsole->setFocus();
 }
