@@ -111,5 +111,6 @@
         <file>icons/internet-telephony.png</file>
         <file>ui/lacking_mapper_script.ui</file>
         <file>ui/set_room_area.ui</file>
+        <file>ui/delete_profile_confirmation.ui</file>
     </qresource>
 </RCC>
