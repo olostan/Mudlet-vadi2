@@ -49,7 +49,9 @@ void TLabel::mousePressEvent( QMouseEvent * event )
 
 void TLabel::mouseMoveEvent( QMouseEvent * qevent )
 {
-    // locate our own name, a bit backwards through the map - not stored in the label object
+    // doesn't work too great atm, disabled
+
+/*    // locate our own name, a bit backwards through the map - not stored in the label object
     if ( !mpHost || !mpHost->mpConsole )
         return;
 
@@ -72,4 +74,5 @@ void TLabel::mouseMoveEvent( QMouseEvent * qevent )
 
 
     QWidget::mouseMoveEvent( qevent );
+*/
 }
