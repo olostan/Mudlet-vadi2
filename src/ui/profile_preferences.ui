@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>585</width>
-    <height>635</height>
+    <height>645</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Profile preferences</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -38,7 +38,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="General">
       <property name="sizePolicy">
@@ -284,8 +284,6 @@
            <widget class="QLineEdit" name="ircNick"/>
           </item>
          </layout>
-         <zorder>label_58</zorder>
-         <zorder>ircNick</zorder>
          <zorder>ircNick</zorder>
          <zorder>label_58</zorder>
         </widget>
@@ -914,7 +912,7 @@ or some other computer model that has a small screen.</string>
           <item row="6" column="0" colspan="2">
            <widget class="QLabel" name="label_19">
             <property name="text">
-             <string>These preferences set how do you want a particular color to be represented visually in the main display</string>
+             <string>These preferences set how do you want a particular color to be represented visually in the main display:</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -1278,13 +1276,13 @@ or some other computer model that has a small screen.</string>
      </widget>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">
-       <string>Map Colors</string>
+       <string>Map</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_18">
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_14">
          <property name="title">
-          <string>Select your color preferences for the Map display</string>
+          <string>Select your color preferences for the map display</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_14">
           <item row="0" column="0">
@@ -1327,7 +1325,7 @@ or some other computer model that has a small screen.</string>
           <item row="4" column="0" colspan="2">
            <widget class="QLabel" name="label_41">
             <property name="text">
-             <string>These preferences set how do you want a particular color to be represented visually in the main display</string>
+             <string>These preferences set how do you want a particular color to be represented visually in the mapper window:</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -1614,25 +1612,60 @@ or some other computer model that has a small screen.</string>
             </item>
            </layout>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <widget class="QPushButton" name="reset_colors_button_2">
             <property name="text">
              <string>Reset all colors to default</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="6" column="0" colspan="2">
+           <widget class="QGroupBox" name="ire_map_options">
+            <property name="title">
+             <string>IRE</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_21">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_57">
+               <property name="text">
+                <string>If you'd like to redownload the latest map and erase your changes;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="redownload_ire_map">
+               <property name="text">
+                <string>press me</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QLabel" name="no_mapper_warning">
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>You need to have the mapper open first in order to update the map</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="7" column="0">
            <spacer name="verticalSpacer_7">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Minimum</enum>
-            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>20</height>
+              <height>40</height>
              </size>
             </property>
            </spacer>
