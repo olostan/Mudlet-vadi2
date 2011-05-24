@@ -23,6 +23,7 @@
 
 
 #include <QListWidgetItem>
+#include <QDir>
 #include "ui_connection_profiles.h"
 
 
@@ -30,25 +31,26 @@ class dlgConnectionProfiles : public QDialog , public Ui::profile_dialog
 {
     Q_OBJECT
 
-        public:
+public:
 
-        dlgConnectionProfiles(QWidget * parent = 0);
+    dlgConnectionProfiles(QWidget * parent = 0);
     void fillout_form();
     void copy_profile( QString );
     void writeProfileData( QString, QString, QString );
     QString readProfileData( QString, QString );
     QStringList readProfileHistory( QString, QString );
+    void accept();
 
 signals:
 
     void signal_establish_connection( QString profile_name, int historyVersion );
-    void accept();
     void update();
 
 public slots:
 
     void slot_chose_history();
     void slot_update_name( const QString ) ;
+    void slot_save_name() ;
     void slot_update_url( const QString ) ;
     void slot_update_port( const QString ) ;
     void slot_update_login( const QString );
@@ -60,7 +62,6 @@ public slots:
     void slot_update();
     void slot_addProfile();
     void slot_deleteProfile();
-    void slot_connection_dlg_finnished();
 
     void slot_update_autologin( int state );
     void slot_connectToServer();
@@ -69,12 +70,16 @@ public slots:
 
 
 private:
-    void deleteDirectory( QString );
-    void deleteAllFiles( QString );
+    bool removeDir(const QString &dirName);
+    void copyFolder(QString sourceFolder, QString destFolder);
+
+    bool validName;
+    bool validUrl;
+    bool validPort;
+    bool validateConnect();
 
     QString            mOrigin;
     QString            mUnsavedProfileName;
-    bool               mSavedNewName;
     QStringList        mProfileList;
     bool               mEditOK;
     QPalette           mRegularPalette;
@@ -82,6 +87,7 @@ private:
     QPalette           mErrorPalette;
     QPalette           mReadOnlyPalette;
     QString            mCurrentProfileEditName;
+    QPushButton *      connect_button;
 
 };
 
