@@ -20,6 +20,7 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QtUiTools>
 #include "dlgConnectionProfiles.h"
 #include "Host.h"
 #include "HostManager.h"
@@ -470,14 +471,18 @@ void dlgConnectionProfiles::slot_addProfile()
     connect_button->setDisabled(true);
 }
 
-void dlgConnectionProfiles::slot_deleteProfile()
+void dlgConnectionProfiles::slot_deleteprofile_check( const QString text )
 {
-    if( ! profiles_tree_widget->currentItem() )
-        return;
-
     QString profile = profiles_tree_widget->currentItem()->text();
-    if( QMessageBox::question(this, tr("Confirmation"), tr("Are you sure you want to delete <i>%1</i>?").arg( profile ), QMessageBox::Yes|QMessageBox::No, QMessageBox::No) != QMessageBox::Yes ) return;
+    if (profile != text)
+        delete_button->setDisabled(true);
+    else
+        delete_button->setEnabled(true);
+}
 
+void dlgConnectionProfiles::slot_reallyDeleteProfile()
+{
+    QString profile = profiles_tree_widget->currentItem()->text();
     int currentRow = profiles_tree_widget->currentIndex().row();
     QDir dir( QDir::homePath()+"/.config/mudlet/profiles/"+profile );
     if (removeDir(dir.path()))
@@ -487,7 +492,6 @@ void dlgConnectionProfiles::slot_deleteProfile()
 
     int row = mProfileList.indexOf( profile );
     mProfileList.removeAt(row);
-
 
 
     if (mProfileList.size()-1 >= row)
@@ -511,6 +515,43 @@ void dlgConnectionProfiles::slot_deleteProfile()
     }
 
     profiles_tree_widget->setFocus();
+}
+
+void dlgConnectionProfiles::slot_deleteProfile()
+{
+    if( ! profiles_tree_widget->currentItem() )
+        return;
+
+    QString profile = profiles_tree_widget->currentItem()->text();
+
+    QUiLoader loader;
+
+    QFile file(":/ui/delete_profile_confirmation.ui");
+    file.open(QFile::ReadOnly);
+
+    QDialog *delete_profile_dialog = dynamic_cast<QDialog *>(loader.load(&file, this));
+    file.close();
+
+    if (!delete_profile_dialog)
+        return;
+
+    delete_profile_lineedit = delete_profile_dialog->findChild<QLineEdit*>("delete_profile_lineedit");
+    delete_button = delete_profile_dialog->findChild<QPushButton*>("delete_button");
+    QPushButton * cancel_button = delete_profile_dialog->findChild<QPushButton*>("cancel_button");
+
+    if (!delete_profile_lineedit || !delete_button || !cancel_button) return;
+
+    connect(delete_profile_lineedit, SIGNAL(textChanged(const QString)), this, SLOT(slot_deleteprofile_check(const QString)));
+    connect(delete_profile_dialog, SIGNAL(accepted()), this, SLOT(slot_reallyDeleteProfile()));
+
+    delete_profile_lineedit->setPlaceholderText(profile);
+    cancel_button->setFocus();
+    delete_button->setDisabled(true);
+    delete_profile_dialog->setWindowTitle("Deleting '"+profile+"'");
+
+    delete_profile_dialog->show();
+    delete_profile_dialog->raise();
+    //delete_profile_dialog->activateWindow();
 }
 
 QString dlgConnectionProfiles::readProfileData( QString profile, QString item )

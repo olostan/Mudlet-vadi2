@@ -1,7 +1,7 @@
 #CONFIG += release warn_off uitools
 CONFIG += debug uitools
 QMAKE_CXXFLAGS_RELEASE += -O3 -Wno-deprecated -Wno-unused-parameter
-QMAKE_CXXFLAGS_DEBUG += -O3 -Wno-deprecated -Wno-unused-parameter
+QMAKE_CXXFLAGS_DEBUG += -O0 -g -Wno-deprecated -Wno-unused-parameter
 MOC_DIR = ./tmp
 OBJECTS_DIR = ./tmp
 QT += network opengl
@@ -215,7 +215,8 @@ FORMS += ui/connection_profiles.ui \
     ui/mapper_room_color.ui \
     ui/room_exits.ui \
     ui/lacking_mapper_script.ui \
-    ui/set_room_area.ui
+    ui/set_room_area.ui \
+    ui/delete_profile_confirmation.ui
 TEMPLATE = app
 TARGET = mudlet
 RESOURCES = mudlet_alpha.qrc

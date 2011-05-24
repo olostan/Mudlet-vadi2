@@ -56,12 +56,14 @@ public slots:
     void slot_update_login( const QString );
     void slot_update_pass( const QString );
     void slot_update_website( const QString );
+    void slot_deleteprofile_check (const QString);
     void slot_update_description();
 
     void slot_item_clicked( QListWidgetItem * );
     void slot_update();
     void slot_addProfile();
     void slot_deleteProfile();
+    void slot_reallyDeleteProfile();
 
     void slot_update_autologin( int state );
     void slot_connectToServer();
@@ -88,6 +90,8 @@ private:
     QPalette           mReadOnlyPalette;
     QString            mCurrentProfileEditName;
     QPushButton *      connect_button;
+    QLineEdit *        delete_profile_lineedit;
+    QPushButton *      delete_button;
 
 };
 
