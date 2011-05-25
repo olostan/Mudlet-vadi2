@@ -599,50 +599,6 @@ void dlgConnectionProfiles::slot_item_clicked(QListWidgetItem *pItem)
         return;
 
     QString profile_name = pItem->text();
-    QStringList loadedProfiles = HostManager::self()->getHostList();
-    if( loadedProfiles.contains( profile_name ) )
-    {
-        profile_name_entry->setReadOnly( true );
-        host_name_entry->setReadOnly( true );
-        port_entry->setReadOnly( true );
-
-        profile_name_entry->setFocusPolicy( Qt::NoFocus );
-        host_name_entry->setFocusPolicy( Qt::NoFocus );
-        port_entry->setFocusPolicy( Qt::NoFocus );
-
-        profile_name_entry->setPalette( mReadOnlyPalette );
-        host_name_entry->setPalette( mReadOnlyPalette );
-        port_entry->setPalette( mReadOnlyPalette );
-
-        notificationArea->show();
-        notificationAreaIconLabelWarning->hide();
-        notificationAreaIconLabelError->hide();
-        notificationAreaIconLabelInformation->show();
-        notificationAreaMessageBox->show();
-        notificationAreaMessageBox->setText(tr("This profile is currently loaded - you'll need to disconnect before changing the connection parameters."));
-    }
-    else
-    {
-        profile_name_entry->setReadOnly( false );
-        host_name_entry->setReadOnly( false );
-        port_entry->setReadOnly( false );
-
-        profile_name_entry->setFocusPolicy( Qt::StrongFocus );
-        host_name_entry->setFocusPolicy( Qt::StrongFocus );
-        port_entry->setFocusPolicy( Qt::StrongFocus );
-
-        profile_name_entry->setPalette( mRegularPalette );
-        host_name_entry->setPalette( mRegularPalette );
-        port_entry->setPalette( mRegularPalette );
-
-        notificationArea->hide();
-        notificationAreaIconLabelWarning->hide();
-        notificationAreaIconLabelError->hide();
-        notificationAreaIconLabelInformation->hide();
-        notificationAreaMessageBox->hide();
-        notificationAreaMessageBox->setText(tr(""));
-
-    }
 
     profile_name_entry->setText( profile_name );
 
@@ -795,6 +751,52 @@ void dlgConnectionProfiles::slot_item_clicked(QListWidgetItem *pItem)
     else
         profile_history->setEnabled(true);
 
+    QStringList loadedProfiles = HostManager::self()->getHostList();
+    if( loadedProfiles.contains( profile_name ) )
+    {
+        profile_name_entry->setReadOnly( true );
+        host_name_entry->setReadOnly( true );
+        port_entry->setReadOnly( true );
+
+        profile_name_entry->setFocusPolicy( Qt::NoFocus );
+        host_name_entry->setFocusPolicy( Qt::NoFocus );
+        port_entry->setFocusPolicy( Qt::NoFocus );
+
+        profile_name_entry->setPalette( mReadOnlyPalette );
+        host_name_entry->setPalette( mReadOnlyPalette );
+        port_entry->setPalette( mReadOnlyPalette );
+
+        notificationArea->show();
+        notificationAreaIconLabelWarning->hide();
+        notificationAreaIconLabelError->hide();
+        notificationAreaIconLabelInformation->show();
+        notificationAreaMessageBox->show();
+        notificationAreaMessageBox->setText(tr("This profile is currently loaded - you'll need to disconnect before changing the connection parameters."));
+    }
+    else
+    {
+        profile_name_entry->setReadOnly( false );
+        host_name_entry->setReadOnly( false );
+        port_entry->setReadOnly( false );
+
+        profile_name_entry->setFocusPolicy( Qt::StrongFocus );
+        host_name_entry->setFocusPolicy( Qt::StrongFocus );
+        port_entry->setFocusPolicy( Qt::StrongFocus );
+
+        profile_name_entry->setPalette( mRegularPalette );
+        host_name_entry->setPalette( mRegularPalette );
+        port_entry->setPalette( mRegularPalette );
+
+        if (notificationAreaMessageBox->text() == tr("This profile is currently loaded - you'll need to disconnect before changing the connection parameters."))
+        {
+            notificationArea->hide();
+            notificationAreaIconLabelWarning->hide();
+            notificationAreaIconLabelError->hide();
+            notificationAreaIconLabelInformation->hide();
+            notificationAreaMessageBox->hide();
+            notificationAreaMessageBox->setText(tr(""));
+        }
+    }
 
 }
 
