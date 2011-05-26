@@ -533,13 +533,29 @@ void dlgConnectionProfiles::slot_deleteProfile()
     file.close();
 
     if (!delete_profile_dialog)
+    {
+        notificationArea->show();
+        notificationAreaIconLabelWarning->hide();
+        notificationAreaIconLabelError->show();
+        notificationAreaIconLabelInformation->hide();
+        notificationAreaMessageBox->show();
+        notificationAreaMessageBox->setText(tr("Your Mudlet installation is missing the deletion confirmation dialog - please reinstall, or if that doesn't help, report the bug."));
         return;
+    }
 
     delete_profile_lineedit = delete_profile_dialog->findChild<QLineEdit*>("delete_profile_lineedit");
     delete_button = delete_profile_dialog->findChild<QPushButton*>("delete_button");
     QPushButton * cancel_button = delete_profile_dialog->findChild<QPushButton*>("cancel_button");
 
-    if (!delete_profile_lineedit || !delete_button || !cancel_button) return;
+    if (!delete_profile_lineedit || !delete_button || !cancel_button) {
+        notificationArea->show();
+        notificationAreaIconLabelWarning->hide();
+        notificationAreaIconLabelError->show();
+        notificationAreaIconLabelInformation->hide();
+        notificationAreaMessageBox->show();
+        notificationAreaMessageBox->setText(tr("Your Mudlet installation is missing several key elements from the deletion confirmation dialog - please reinstall, or if that doesn't help, report the bug."));
+        return;
+    }
 
     connect(delete_profile_lineedit, SIGNAL(textChanged(const QString)), this, SLOT(slot_deleteprofile_check(const QString)));
     connect(delete_profile_dialog, SIGNAL(accepted()), this, SLOT(slot_reallyDeleteProfile()));
