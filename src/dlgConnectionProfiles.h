@@ -80,6 +80,8 @@ private:
     bool validPort;
     bool validateConnect();
 
+    QString ordinalSuffix(int n);
+
     QString            mOrigin;
     QString            mUnsavedProfileName;
     QStringList        mProfileList;

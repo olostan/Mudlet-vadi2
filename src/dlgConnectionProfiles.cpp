@@ -1294,3 +1294,18 @@ bool dlgConnectionProfiles::removeDir(const QString &dirName)
 
     return result;
 }
+
+QString dlgConnectionProfiles::ordinalSuffix(int n)
+{
+    n = n % 100;
+    int d = n % 10;
+
+    if (d == 1 && n != 11) {
+        return QString("st");
+    } else if (d == 2 && n != 12) {
+        return QString("nd");
+    } else if (d == 3 && n != 13) {
+        return QString("rd");
+    } else
+        return QString("nth");
+}
