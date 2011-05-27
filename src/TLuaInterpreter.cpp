@@ -35,13 +35,13 @@
 #include <string>
 #include "TEvent.h"
 #include "dlgMapper.h"
+#include "lua_yajl.c"
 
 extern "C"
 {
     #include "lua.h"
     #include "lualib.h"
     #include "lauxlib.h"
-    #include "lua_yajl.c"
 }
 
 extern QStringList gSysErrors;
@@ -2129,6 +2129,36 @@ int TLuaInterpreter::moveWindow( lua_State *L )
     return 0;
 }
 
+int TLuaInterpreter::setMainWindowSize( lua_State *L )
+{
+    int x1;
+    if( ! lua_isnumber( L, 1 ) )
+    {
+        lua_pushstring( L, "setBackgroundColor: wrong argument type" );
+        lua_error( L );
+        return 1;
+    }
+    else
+    {
+        x1 = lua_tonumber( L, 1 );
+    }
+    int y1;
+    if( ! lua_isnumber( L, 2 ) )
+    {
+        lua_pushstring( L, "setBackgroundColor: wrong argument type" );
+        lua_error( L );
+        return 1;
+    }
+    else
+    {
+        y1 = lua_tonumber( L, 2 );
+    }
+    Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
+
+    mudlet::self()->resize( x1, y1 );
+
+    return 0;
+}
 
 int TLuaInterpreter::setBackgroundColor( lua_State *L )
 {
@@ -3149,6 +3179,9 @@ int TLuaInterpreter::echoUserWindow( lua_State *L )
     mudlet::self()->echoWindow( pHost, windowName, text );
     return 0;
 }
+
+#include <Phonon>
+
 int TLuaInterpreter::playSoundFile( lua_State * L )
 {
     string luaSendText="";
@@ -3162,7 +3195,10 @@ int TLuaInterpreter::playSoundFile( lua_State * L )
     {
         luaSendText = lua_tostring( L, 1 );
     }
-    QSound::play( QString( luaSendText.c_str() ) );
+    //QSound::play( QString( luaSendText.c_str() ) );
+
+    Phonon::MediaObject *music = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource(luaSendText.c_str()));
+    music->play();
     return 0;
 }
 
@@ -7621,6 +7657,7 @@ void TLuaInterpreter::initLuaGlobals()
     lua_register( pGlobalLua, "registerAnonymousEventHandler", TLuaInterpreter::registerAnonymousEventHandler );
     lua_register( pGlobalLua, "saveMap", TLuaInterpreter::saveMap );
     lua_register( pGlobalLua, "loadMap", TLuaInterpreter::loadMap );
+    lua_register( pGlobalLua, "setMainWindowSize", TLuaInterpreter::setMainWindowSize );
 
     luaopen_yajl(pGlobalLua);
     lua_setglobal( pGlobalLua, "yajl" );
@@ -7641,13 +7678,52 @@ void TLuaInterpreter::initLuaGlobals()
             e = "Lua error:";
             e+=lua_tostring( pGlobalLua, 1 );
         }
-        //QString msg = "[FAILED] cannot find Lua module rex_pcre. Some functions may not be available.";
-        QString msg = e.c_str();
+        QString msg = "[ ERROR ] cannot find Lua module rex_pcre. Some functions may not be available.";
+        msg.append( e.c_str() );
         gSysErrors << msg;
     }
     else
     {
-        QString msg = "[INFO] found Lua module rex_pcre";
+        QString msg = "[  OK  ]  -  Lua module rex_pcre loaded";
+        gSysErrors << msg;
+    }
+
+    error = luaL_dostring( pGlobalLua, "require \"zip\"" );
+
+    if( error != 0 )
+    {
+        string e = "no error message available from Lua";
+        if( lua_isstring( pGlobalLua, 1 ) )
+        {
+            e = "Lua error:";
+            e+=lua_tostring( pGlobalLua, 1 );
+        }
+        QString msg = "[ ERROR ] cannot find Lua module zip";
+        msg.append( e.c_str() );
+        gSysErrors << msg;
+    }
+    else
+    {
+        QString msg = "[  OK  ]  -  Lua module zip loaded";
+        gSysErrors << msg;
+    }
+    error = luaL_dostring( pGlobalLua, "require \"lfs\"" );
+
+    if( error != 0 )
+    {
+        string e = "no error message available from Lua";
+        if( lua_isstring( pGlobalLua, 1 ) )
+        {
+            e = "Lua error:";
+            e+=lua_tostring( pGlobalLua, 1 );
+        }
+        QString msg = "[ ERROR ] cannot find Lua module lfs (Lua File System).";
+        msg.append( e.c_str() );
+        gSysErrors << msg;
+    }
+    else
+    {
+        QString msg = "[  OK  ]  -  Lua module lfs loaded";
         gSysErrors << msg;
     }
 
@@ -7661,13 +7737,13 @@ void TLuaInterpreter::initLuaGlobals()
             e = "Lua error:";
             e+=lua_tostring( pGlobalLua, 1 );
         }
-        //QString msg = "[FAILED] cannot find Lua module luasql.sqlite3. The database functionality will not be available.";
-        QString msg = e.c_str();
+        QString msg = "[ ERROR ] cannot find Lua module luasql.sqlite3. Database support will not be available.";
+        msg.append( e.c_str() );
         gSysErrors << msg;
     }
     else
     {
-        QString msg = "[INFO] found Lua module luasql.sqlite3";
+        QString msg = "[  OK  ]  -  Lua module sqlite3 loaded";
         gSysErrors << msg;
     }
 
@@ -7729,14 +7805,14 @@ void TLuaInterpreter::loadGlobal()
         string e = "no error message available from Lua";
         if( lua_isstring( pGlobalLua, 1 ) )
         {
-            e = "[CRITICAL ERROR] LuaGlobal.lua compile error - please report";
+            e = "[ ERROR ]  -  LuaGlobal.lua compile error - please report!";
             e += lua_tostring( pGlobalLua, 1 );
         }
         gSysErrors << e.c_str();
     }
     else
     {
-        gSysErrors << "[INFO] LuaGlobal.lua loaded successfully.";
+        gSysErrors << "[  OK  ]  -  mudlet-lua API & Geyser Layout manager loaded.";
     }
 }
 

@@ -268,7 +268,7 @@ void dlgConnectionProfiles::slot_update_name( const QString _n )
     QString name = profile_name_entry->text().trimmed();
     QListWidgetItem * pItem = profiles_tree_widget->currentItem();
 
-    const QString allowedChars = " _0123456789-#&aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ";
+    const QString allowedChars = ". _0123456789-#&aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ";
     bool __error = false;
     for( int __i=0; __i<name.size(); __i++ )
     {
@@ -291,7 +291,7 @@ void dlgConnectionProfiles::slot_update_name( const QString _n )
         return;
     }
 
-    // see if this an edit that already uses a similar name
+    // see if there is an edit that already uses a similar name
     if( pItem->text() != name && mProfileList.contains( name ) )
     {
         notificationArea->show();
@@ -302,7 +302,9 @@ void dlgConnectionProfiles::slot_update_name( const QString _n )
         notificationAreaMessageBox->setText( tr("This profile name is already in use.") );
         validName = false;
         connect_button->setDisabled(true);
-    } else {
+    }
+    else
+    {
         notificationArea->hide();
         notificationAreaIconLabelWarning->hide();
         notificationAreaIconLabelError->hide();
@@ -569,7 +571,6 @@ void dlgConnectionProfiles::slot_deleteProfile()
 
     delete_profile_dialog->show();
     delete_profile_dialog->raise();
-    //delete_profile_dialog->activateWindow();
 }
 
 QString dlgConnectionProfiles::readProfileData( QString profile, QString item )
@@ -756,13 +757,14 @@ void dlgConnectionProfiles::slot_item_clicked(QListWidgetItem *pItem)
             datetime.setDate(QDate (year.toInt(), month.toInt(), day.toInt()));
 
             //readableEntries << datetime.toString(Qt::SystemLocaleLongDate);
-            profile_history->addItem(datetime.toString(Qt::SystemLocaleLongDate), QVariant(entries.at(i)));
-        } else
+            profile_history->addItem(datetime.toString(Qt::SystemLocaleShortDate), QVariant(entries.at(i)));
+        }
+        else
             profile_history->addItem(entries.at(i), QVariant(entries.at(i))); // if it has a custom name, use it as it is
 
     }
 
-    if (profile_history->count() == 0)
+    if( profile_history->count() == 0 )
         profile_history->setDisabled(true);
     else
         profile_history->setEnabled(true);
@@ -1267,29 +1269,30 @@ void dlgConnectionProfiles::copyFolder(QString sourceFolder, QString destFolder)
 }
 
 // credit: http://john.nachtimwald.com/2010/06/08/qt-remove-directory-and-its-contents/
-bool dlgConnectionProfiles::removeDir(const QString &dirName)
+bool dlgConnectionProfiles::removeDir( const QString dirName, QString originalPath )
 {
     bool result = true;
     QDir dir(dirName);
-
-    if (dir.exists(dirName))
+    if( dir.exists( dirName ) )
     {
-        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst))
+        Q_FOREACH( QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst))
         {
-            if (info.isDir())
+            // prevent recursion outside of the original branch
+            if( info.isDir() && info.absoluteFilePath().startsWith( originalPath ) )
             {
-                result = removeDir(info.absoluteFilePath());
+                result = removeDir( info.absoluteFilePath(), originalPath );
             }
-            else {
-                result = QFile::remove(info.absoluteFilePath());
+            else
+            {
+                result = QFile::remove( info.absoluteFilePath() );
             }
 
-            if (!result)
+            if( !result )
             {
                 return result;
             }
         }
-        result = dir.rmdir(dirName);
+        result = dir.rmdir( dirName );
     }
 
     return result;
