@@ -1,14 +1,14 @@
-
+#include <yajl/yajl_parse.h>
+#include <yajl/yajl_gen.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <math.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <yajl/yajl_parse.h>
-#include <yajl/yajl_gen.h>
 
-#define js_check_generator(L, narg) (yajl_gen*)luaL_checkudata((L), (narg), "yajl.generator.meta")
+#define js_check_generator(L, narg) \
+    (yajl_gen*)luaL_checkudata((L), (narg), "yajl.generator.meta")
 
 static void* js_null;
 
@@ -29,11 +29,20 @@ static int got_map_value(lua_State* L);
 //////////////////////////////////////////////////////////////////////
 static double todouble(lua_State* L, const char* val, size_t len) {
     // Convert into number using a temporary:
-	double num;
     char* tmp = (char*)lua_newuserdata(L, len+1);
     memcpy(tmp, val, len);
     tmp[len] = '\0';
-    num = strtod(tmp, NULL);
+    double num = strtod(tmp, NULL);
+/*
+        if ((num == HUGE_VAL || num == -HUGE_VAL) &&
+            errno == ERANGE)
+        {
+            TODO: Add appropriate handling of large numbers by delegating.
+        }
+        TODO: How can we tell if there was information loss?  aka the
+            number of significant digits in the string exceeds the
+            significant digits in the double.
+*/
     lua_pop(L, 1);
     return num;
 }
@@ -41,9 +50,6 @@ static double todouble(lua_State* L, const char* val, size_t len) {
 
 //////////////////////////////////////////////////////////////////////
 static int js_to_string(lua_State *L) {
-	yajl_gen* gen;
-	const unsigned char *buf;
-	size_t len;
     lua_pushcfunction(L, js_generator);
     // convert_me, {extra}, ?, js_gen
     if ( lua_istable(L, 2) ) {
@@ -67,9 +73,9 @@ static int js_to_string(lua_State *L) {
     // convert_me, {extra}, ?, gen_ud, js_gen_val, gen_ud, convert_me
     lua_call(L, 2, 0);
     // convert_me, {extra}, ?, gen_ud
-    gen = js_check_generator(L, -1);
-    
-    
+    yajl_gen* gen = js_check_generator(L, -1);
+    const unsigned char *buf;
+    size_t len;
     yajl_gen_get_buf(*gen, &buf, &len);
     // Copy into results:
     lua_pushlstring(L, (char*)buf, len);
@@ -137,8 +143,6 @@ static int got_array_value(lua_State* L) {
     lua_rawseti(L, -4, lua_tointeger(L, -3));
     lua_pushinteger(L, lua_tointeger(L, -2)+1);
     lua_replace(L, -3);
-
-	return 0;
 }
 
 static int to_value_start_map(void* ctx) {
@@ -483,11 +487,9 @@ static int js_parser_delete(lua_State *L) {
 //////////////////////////////////////////////////////////////////////
 static int js_parser(lua_State *L) {
 
-	yajl_handle* handle;
-
     luaL_checktype(L, 1, LUA_TTABLE);
 
-    handle = (yajl_handle*)lua_newuserdata(L, sizeof(yajl_handle));
+    yajl_handle* handle = (yajl_handle*)lua_newuserdata(L, sizeof(yajl_handle));
 
     *handle = yajl_alloc(&js_parser_callbacks, NULL, (void*)L);
     luaL_getmetatable(L, "yajl.parser.meta");
@@ -567,7 +569,6 @@ static int js_generator_double(lua_State *L) {
     return 0;
 }
 
-#include <float.h>
 //////////////////////////////////////////////////////////////////////
 static int js_generator_number(lua_State *L) {
 
@@ -590,7 +591,7 @@ static int js_generator_number(lua_State *L) {
     } else if ( num == -HUGE_VAL ) {
         str = "-1e+666";
         len = 7;
-    } else if ( _isnan(num) ) {
+    } else if ( isnan(num) ) {
         str = "-0"; 
         len = 2;
    } else {
@@ -663,8 +664,7 @@ static int js_generator_open_array(lua_State *L) {
 
 //////////////////////////////////////////////////////////////////////
 static int js_generator_close(lua_State *L) {
-    lua_Integer type;
-	// Why doesn't yajl_gen keep track of this!?
+    // Why doesn't yajl_gen keep track of this!?
     lua_getfenv(L, 1);
     lua_getfield(L, -1, "stack");
     lua_rawgeti(L, -1, lua_objlen(L, -1));
@@ -672,7 +672,7 @@ static int js_generator_close(lua_State *L) {
         lua_pushfstring(L, "StackUnderflow: Attempt to call close() when no array or object has been opened at %s line %d", __FILE__, __LINE__);
         lua_error(L);
     }
-    type = lua_tointeger(L, -1);
+    lua_Integer type = lua_tointeger(L, -1);
     switch ( type ) {
     case JS_OPEN_OBJECT:
         js_generator_assert(L,
@@ -698,8 +698,6 @@ static int js_generator_close(lua_State *L) {
 
 //////////////////////////////////////////////////////////////////////
 static int js_generator_value(lua_State *L) {
-	int max      = 0;
-    int is_array = 1;
     int type = lua_type(L, 2);
 
     switch ( type ) {
@@ -733,7 +731,8 @@ static int js_generator_value(lua_State *L) {
         // Simply ignore it, perhaps we should warn?
         if ( type != LUA_TTABLE ) return 0;
 
-        
+        int max      = 0;
+        int is_array = 1;
 
         // First iterate over the table to see if it is an array:
         lua_pushnil(L);
@@ -841,8 +840,6 @@ static void js_printer(void* void_ctx, const char* str, size_t len) {
 
 //////////////////////////////////////////////////////////////////////
 static int js_generator(lua_State *L) {
-	yajl_gen* handle;
-	js_printer_ctx* print_ctx;
     yajl_print_t   print = NULL;
     void *          ctx  = NULL;
 
@@ -861,7 +858,7 @@ static int js_generator(lua_State *L) {
         // {args}, ?, tbl, printer, printer
         lua_setfield(L, -3, "printer");
 
-        print_ctx = (js_printer_ctx*)
+        js_printer_ctx* print_ctx = (js_printer_ctx*)
             lua_newuserdata(L, sizeof(js_printer_ctx));
         // {args}, ?, tbl, printer, printer_ctx
 
@@ -887,7 +884,7 @@ static int js_generator(lua_State *L) {
     lua_setfield(L, -2, "stack");
 
     // {args}, ?, tbl
-    handle = (yajl_gen*)lua_newuserdata(L, sizeof(yajl_gen));
+    yajl_gen* handle = (yajl_gen*)lua_newuserdata(L, sizeof(yajl_gen));
     *handle = yajl_gen_alloc(NULL);
 
     if ( print ) {

@@ -35,7 +35,12 @@
 #include <string>
 #include "TEvent.h"
 #include "dlgMapper.h"
-#include "lua_yajl.c"
+
+#ifdef Q_OS_LINUX
+#include "lua_yajl1.c"
+#else
+#include "lua_yajl1.c"
+#endif
 
 extern "C"
 {
@@ -3180,7 +3185,7 @@ int TLuaInterpreter::echoUserWindow( lua_State *L )
     return 0;
 }
 
-#include <Phonon>
+#include <phonon>
 
 int TLuaInterpreter::playSoundFile( lua_State * L )
 {

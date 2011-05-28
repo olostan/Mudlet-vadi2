@@ -104,7 +104,6 @@ SOURCES += TConsole.cpp \
     dlgMapper.cpp \
     TRoom.cpp \
     TMap.cpp \
-    lua_yajl.c \
     TBuffer.cpp \
     irc/src/ircbuffer.cpp \
     irc/src/irc.cpp \
@@ -116,6 +115,12 @@ SOURCES += TConsole.cpp \
     qtwidgets/fancylineedit.cpp \
     qtwidgets/filterlineedit.cpp
 
+windows: {
+    SOURCES += lua_yajl2.c
+}
+unix: {
+    SOURCES += lua_yajl1.c
+}
 
 HEADERS += mudlet.h \
     TTimer.h \
