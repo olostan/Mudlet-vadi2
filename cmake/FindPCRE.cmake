@@ -17,6 +17,7 @@ FIND_PATH(PCRE_INCLUDE_DIR pcre.h
   /sw # Fink
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
+
   /opt
 )
 
@@ -34,6 +35,7 @@ FIND_LIBRARY(PCRE_LIBRARY
   /opt/local
   /opt/csw
   /opt
+  /usr/lib/x86_64-linux-gnu
 )
 
 FIND_LIBRARY(PCRECPP_LIBRARY 
@@ -50,6 +52,7 @@ FIND_LIBRARY(PCRECPP_LIBRARY
   /opt/local
   /opt/csw
   /opt
+  /usr/lib/x86_64-linux-gnu
 )
 
 FIND_LIBRARY(PCREPOSIX_LIBRARY 

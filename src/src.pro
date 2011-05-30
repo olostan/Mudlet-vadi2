@@ -1,10 +1,13 @@
-#CONFIG += release warn_off uitools
-CONFIG += debug uitools
+
+CONFIG += release uitools
+
 QMAKE_CXXFLAGS_RELEASE += -O3 -Wno-deprecated -Wno-unused-parameter
-QMAKE_CXXFLAGS_DEBUG += -O3 -Wno-deprecated -Wno-unused-parameter
+QMAKE_CXXFLAGS_DEBUG += -O0 -g -Wno-deprecated -Wno-unused-parameter
 MOC_DIR = ./tmp
 OBJECTS_DIR = ./tmp
-QT += network opengl
+QT += network opengl phonon
+DEPENDPATH += .
+INCLUDEPATH += .
 LIBLUA = -llua5.1
 !exists(/usr/lib/liblua5.1.a):LIBLUA = -llua
 
@@ -15,25 +18,28 @@ unix:LIBS += -lpcre \
     $$LIBLUA \
     -lhunspell \
     -lyajl
-win32:LIBS += -Lc:\mudlet_package \
+
+win32:LIBS += -L"c:\mudlet_package_MINGW" \
     -llua51 \
     -lpcre \
-    -Lc:\mudlet_package\Lua \
     -lhunspell \
     -lyajl
+
 unix:INCLUDEPATH += /usr/include/lua5.1
-win32:INCLUDEPATH += c:\mudlet_package\Lua_src\include \
-    c:\mudlet_package\zlib-1.2.5\
-    c:\mudlet_package\boost_1_45_0 \
-    c:\mudlet_package\pcre-8.0-lib\include \
-    c:\mudlet_package\yajl\yajl\src \
-    C:\mudlet_package\hunspell-1.3.1\src\
+
+win32:INCLUDEPATH += "c:\mudlet_package_MINGW\Lua_src\include" \
+    "c:\mudlet_package_MINGW\zlib-1.2.5" \
+    "c:\mudlet_package_MINGW\boost_1_45_0" \
+    "c:\mudlet_package_MINGW\pcre-8.0-lib\include" \
+    "C:\mudlet_package_MSVC\lloyd-yajl-f4b2b1a\yajl-2.0.1\include" \
+    "C:\mudlet_package_MINGW\hunspell-1.3.1\src"
+
 unix:isEmpty( INSTALL_PREFIX ):INSTALL_PREFIX = /usr/local
 unix: {
     SHARE_DIR = /usr/local/share/mudlet
     BIN_DIR = $$INSTALL_PREFIX/bin
 }
-INCLUDEPATH += irc/include
+INCLUDEPATH += irc/include += qtwidgets
 SOURCES += TConsole.cpp \
     ctelnet.cpp \
     main.cpp \
@@ -98,7 +104,6 @@ SOURCES += TConsole.cpp \
     dlgMapper.cpp \
     TRoom.cpp \
     TMap.cpp \
-    lua_yajl.c \
     TBuffer.cpp \
     irc/src/ircbuffer.cpp \
     irc/src/irc.cpp \
@@ -106,8 +111,16 @@ SOURCES += TConsole.cpp \
     irc/src/ircutil.cpp \
     dlgIRC.cpp \
     T2DMap.cpp \
-    dlgRoomExits.cpp
+    dlgRoomExits.cpp \
+    qtwidgets/fancylineedit.cpp \
+    qtwidgets/filterlineedit.cpp
 
+windows: {
+    SOURCES += lua_yajl2.c
+}
+unix: {
+    SOURCES += lua_yajl1.c
+}
 
 HEADERS += mudlet.h \
     TTimer.h \
@@ -115,8 +128,8 @@ HEADERS += mudlet.h \
     TConsole.h \
     ctelnet.h \
     Host.h \
-        TMap.h \
-        TAStar.h \
+    TMap.h \
+    TAStar.h \
     HostManager.h \
     HostPool.h \
     dlgConnectionProfiles.h \
@@ -181,7 +194,9 @@ HEADERS += mudlet.h \
     irc/include/ircutil.h \
     dlgIRC.h \
     T2DMap.h \
-    dlgRoomExits.h
+    dlgRoomExits.h \
+    qtwidgets/fancylineedit.h \
+    qtwidgets/filterlineedit.h
 
 FORMS += ui/connection_profiles.ui \
     ui/main_window.ui \
@@ -210,7 +225,9 @@ FORMS += ui/connection_profiles.ui \
     ui/irc.ui \
     ui/mapper_room_color.ui \
     ui/room_exits.ui \
-    ui/lacking_mapper_script.ui
+    ui/lacking_mapper_script.ui \
+    ui/set_room_area.ui \
+    ui/delete_profile_confirmation.ui
 TEMPLATE = app
 TARGET = mudlet
 RESOURCES = mudlet_alpha.qrc

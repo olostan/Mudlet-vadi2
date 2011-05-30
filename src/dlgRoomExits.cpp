@@ -27,7 +27,7 @@ dlgRoomExits::dlgRoomExits( Host * pH, QWidget * pW )
 , QDialog( pW )
 {
     setupUi(this);
-    connect( saveButton, SIGNAL(pressed()), this, SLOT(save()));
+    connect( buttonBox, SIGNAL(accepted()), this, SLOT(save()));
     connect( addSpecialExit,SIGNAL(pressed()), this, SLOT(slot_addSpecialExit()));
     connect( specialExits,SIGNAL(itemClicked ( QTreeWidgetItem *, int)), this, SLOT(slot_editItem(QTreeWidgetItem*,int)));
 }

@@ -1129,7 +1129,7 @@ namespace Irc
         {
             d->nick = nick;
             if (d->socket)
-            	raw(QString(QLatin1String("NICK %1")).arg(nick));
+                raw(QString(QLatin1String("NICK %1")).arg(nick));
         }
     }
 

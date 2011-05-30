@@ -16,7 +16,7 @@ copyright (c) 2008-2009 by Heiko Koehn (koehnheiko@googlemail.com)
 #define CTELNET_H
 #include <QObject>
 #include <list>
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <stdio.h>
 #include <iostream>
 #include <string>
@@ -50,6 +50,7 @@ const char TN_DONT = 254;
 const char TN_IAC = 255;
 
 const char GMCP = 201; /* GMCP */
+const char MXP = 91; //MXP
 
 const char OPT_ECHO = 1;
 const char OPT_SUPPRESS_GA = 3;

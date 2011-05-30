@@ -47,16 +47,19 @@ public:
         Host * mpHost;
         QNetworkAccessManager * mpDownloader;
         QProgressDialog * mpProgressDialog;
-
+        QNetworkReply * mpReply;
 
 public slots:
         void slot_toggleShowRoomIDs(int s);
         void slot_toggleStrongHighlight( int v );
-        void show2dView();
+        void show2dView(const QString& view);
+        void hide3Dbuttons(const QString &view);
         void slot_togglePanel();
         void setDownloadProgress( qint64, qint64 );
+        void cancel();
         void replyFinished( QNetworkReply * );
         void goRoom();
+        void searchItems(const QString& entry);
         void choseRoom( QListWidgetItem * );
 };
 

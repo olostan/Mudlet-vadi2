@@ -606,11 +606,15 @@ void dlgTriggerEditor::slot_viewStatsAction()
 
 void dlgTriggerEditor::slot_viewErrorsAction()
 {
-    if( frame_4->isHidden() )frame_4->show();
-    else
+    if( frame_4->isHidden() ) {
+        frame_4->show();
+        mpErrorConsole->show();
+        popupArea->show();
+    } else {
         frame_4->hide();
-    mpErrorConsole->show();
-    popupArea->show();
+        mpErrorConsole->hide();
+        popupArea->hide();
+    }
 }
 
 
@@ -6251,7 +6255,13 @@ void dlgTriggerEditor::slot_chose_action_icon()
 
 void dlgTriggerEditor::slot_colorizeTriggerSetFgColor()
 {
-    QColor color = QColorDialog::getColor( mpHost->mBlue, this );
+    QTreeWidgetItem * pItem = mCurrentTrigger;
+    if( ! pItem ) return;
+    if( ! pItem->parent() ) return;
+    int triggerID = pItem->data( 0, Qt::UserRole ).toInt();
+    TTrigger * pT = mpHost->getTriggerUnit()->getTrigger( triggerID );
+
+    QColor color = QColorDialog::getColor( pT->getFgColor(), this );
     if ( color.isValid() )
     {
         QPalette palette;
@@ -6264,7 +6274,13 @@ void dlgTriggerEditor::slot_colorizeTriggerSetFgColor()
 
 void dlgTriggerEditor::slot_colorizeTriggerSetBgColor()
 {
-    QColor color = QColorDialog::getColor( mpHost->mRed, this );
+    QTreeWidgetItem * pItem = mCurrentTrigger;
+    if( ! pItem ) return;
+    if( ! pItem->parent() ) return;
+    int triggerID = pItem->data( 0, Qt::UserRole ).toInt();
+    TTrigger * pT = mpHost->getTriggerUnit()->getTrigger( triggerID );
+
+    QColor color = QColorDialog::getColor( pT->getBgColor(), this );
     if ( color.isValid() )
     {
         QPalette palette;

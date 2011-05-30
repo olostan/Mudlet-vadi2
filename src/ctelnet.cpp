@@ -12,7 +12,7 @@
 
 #include "ctelnet.h"
 #include <time.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <QTextCodec>
 #include <QHostAddress>
 #include <iostream>
@@ -30,8 +30,14 @@
 #include "dlgMapper.h"
 
 #ifdef DEBUG
-#undef DEBUG
+    #undef DEBUG
 #endif
+
+#ifdef QT_DEBUG
+    #define DEBUG
+#endif
+
+
 
 //#define DEBUG
 
@@ -68,7 +74,7 @@ cTelnet::cTelnet( Host * pH )
     // initialize default encoding
     encoding = "UTF-8";
     encodingChanged(encoding);
-    termType = "Mudlet 2.0";
+    termType = "Mudlet 2.0.0";
     iac = iac2 = insb = false;
 
     command = "";
@@ -165,17 +171,10 @@ void cTelnet::connectIt(const QString &address, int port)
     {
         QString m = gSysErrors[i];
         m.append("\n");
-        if( m.indexOf("[ERROR]") != -1 )
-        {
-            mpHost->mpConsole->print( m, 255, 0, 0, 0, 0, 0 );
-        }
-        else
-        {
-            mpHost->mpConsole->print( m, 0, 255, 0, 0, 0, 0 );
-        }
+        postMessage( m );
     }
 
-    QString server = "[INFO] looking up the IP address of server:" + address + ":" + QString::number(port) + " ...\n";
+    QString server = "[ INFO ]  -  looking up the IP address of server:" + address + ":" + QString::number(port) + " ...\n";
     postMessage( server );
     QHostInfo::lookupHost(address, this, SLOT(handle_socket_signal_hostFound(QHostInfo)));
 }
@@ -188,7 +187,7 @@ void cTelnet::disconnect ()
 
 void cTelnet::handle_socket_signal_error()
 {
-    QString err = "[ERROR] TCP/IP socket ERROR:" + socket.errorString() + "\n";
+    QString err = "[ ERROR ] TCP/IP socket ERROR:" + socket.errorString() + "\n";
     postMessage( err );
 }
 
@@ -205,7 +204,7 @@ void cTelnet::slot_send_pass()
 void cTelnet::handle_socket_signal_connected()
 {
     reset();
-    QString msg = "[INFO] A connection has been established successfully.\n";
+    QString msg = "[ INFO ]  -  A connection has been established successfully.\n\n\n";
     postMessage( msg );
     QString func = "onConnect";
     QString nothing = "";
@@ -222,11 +221,11 @@ void cTelnet::handle_socket_signal_disconnected()
     postData();
     QString msg;
     QTime timeDiff(0,0,0,0);
-    msg = QString("[INFO] connection time: %1\n").arg(timeDiff.addMSecs(mConnectionTime.elapsed()).toString("hh:mm:ss.zzz"));
+    msg = QString("[ INFO ]  -  connection time: %1\n").arg(timeDiff.addMSecs(mConnectionTime.elapsed()).toString("hh:mm:ss.zzz"));
     mNeedDecompression = false;
     reset();
     QString lf = "\n\n";
-    QString err = "[INFO] Socket got disconnected. " + socket.errorString() + "\n";
+    QString err = "[ INFO ]  -  Socket got disconnected. " + socket.errorString() + "\n";
     QString spacer = "-------------------------------------------------------------\n";
     if( ! mpHost->mIsGoingDown )
     {
@@ -243,16 +242,16 @@ void cTelnet::handle_socket_signal_hostFound(QHostInfo hostInfo)
     if(!hostInfo.addresses().isEmpty())
     {
         mHostAddress = hostInfo.addresses().first();
-        QString msg = "[INFO] The IP address of "+hostName+" has been found. It is: "+mHostAddress.toString()+"\n";
+        QString msg = "[ INFO ]  -  The IP address of "+hostName+" has been found. It is: "+mHostAddress.toString()+"\n";
         postMessage( msg );
-        msg = "[INFO] trying to connect to "+mHostAddress.toString()+":"+QString::number(hostPort)+" ...\n";
+        msg = "[ INFO ]  -  trying to connect to "+mHostAddress.toString()+":"+QString::number(hostPort)+" ...\n";
         postMessage( msg );
         socket.connectToHost(mHostAddress, hostPort);
     }
     else
     {
         socket.connectToHost(hostInfo.hostName(), hostPort);
-        QString msg = "[ERROR] Host name lookup Failure! Connection cannot be established. The server name is not correct, not working properly, or your nameservers are not working properly.\n";
+        QString msg = "[ ERROR ] Host name lookup Failure! Connection cannot be established. The server name is not correct, not working properly, or your nameservers are not working properly.\n";
         postMessage( msg );
         return;
     }
@@ -373,7 +372,7 @@ void cTelnet::setDisplayDimensions()
     }
 }
 
-void cTelnet::sendTelnetOption (char type, char option)
+void cTelnet::sendTelnetOption( char type, char option )
 {
     //cout << "CLIENT SENDING Telnet option: command<"<<(int)type<<"> option<"<<(int)option<<">"<<endl;
     string cmd;
@@ -402,6 +401,7 @@ void cTelnet::processTelnetCommand( const string & command )
       }
       case TN_WILL:
       {
+
           //server wants to enable some option (or he sends a timing-mark)...
           option = command[2];
           int idxOption = static_cast<int>(option);
@@ -467,6 +467,13 @@ void cTelnet::processTelnetCommand( const string & command )
                 cout << "  sending: " << _h << endl;
                 socketOutRaw( _h );
               }*/
+              break;
+          }
+
+          if( option == MXP )
+          {
+              sendTelnetOption( TN_DO, 91 );
+              mpHost->mpConsole->print("\n<MXP enabled>\n");
               break;
           }
 
@@ -602,6 +609,12 @@ void cTelnet::processTelnetCommand( const string & command )
             sendTelnetOption( TN_WILL, 201 );
             break;
           }
+          if( option == MXP ) // MXP support
+          {
+            sendTelnetOption( TN_WILL, 91 );
+            mpHost->mpConsole->print("\n<MXP support enabled>\n");
+            break;
+          }
           if( option == static_cast<char>(102) ) // channel 102 support
           {
             cout << "TELNET IAC DO CHANNEL 102" << endl;
@@ -665,10 +678,10 @@ void cTelnet::processTelnetCommand( const string & command )
       {
           //subcommand - we analyze and respond...
           option = command[2];
-          //~ unsigned char c = option;
-          //~ printf("SB option: %d\n", (int)c);
+          //unsigned char c = option;
+          //printf("SB option: %d\n", (int)c);
 
-          /* ATCP */
+          // ATCP
           if( option == static_cast<char>(200) )
           {
               QString _m = command.c_str();
@@ -687,10 +700,19 @@ void cTelnet::processTelnetCommand( const string & command )
                   socketOutRaw( _h );
               }
 
+              if( _m.startsWith( "Client.GUI" ) )
+              {
+                  QString url = _m.section( '\n', 1 );
+                  mpHost->mpConsole->print("<Server offers downloadable GUI (url='");
+                  mpHost->mpConsole->print( url );
+                  mpHost->mpConsole->print("')>\n");
+
+              }
+
               return;
           }
 
-          /* GMCP */
+          // GMCP
           if( option == GMCP )
           {
               QString _m = command.c_str();
@@ -701,7 +723,7 @@ void cTelnet::processTelnetCommand( const string & command )
               return;
           }
 
-          if( option == static_cast<char>(102) )
+          if( option == static_cast<unsigned char>(102) )
           {
               QString _m = command.c_str();
               if( command.size() < 6 ) return;
@@ -902,7 +924,7 @@ void cTelnet::atcpComposerSave( QString txt )
         _h += 200;
         _h += "olesetbuf \n ";
         _h += txt.toLatin1().data();
-            _h += '\n';
+        _h += '\n';
         _h += TN_IAC;
         _h += TN_SE;
         socketOutRaw( _h );
@@ -958,13 +980,17 @@ void cTelnet::postMessage( QString msg )
     {
         msg.append("\n");
     }
-    if( msg.indexOf("[ERROR]") != -1 )
+    if( msg.indexOf("[ ERROR ]") != -1 )
     {
-        mpHost->mpConsole->print( msg, 255, 0, 0, 0, 0, 0 );
+        mpHost->mpConsole->print( msg, 150, 0, 0, 0, 0, 0 );
+    }
+    else if( msg.contains( "[  OK  ]" ) )
+    {
+        mpHost->mpConsole->print( msg, 0, 150, 0, 0, 0, 0 );
     }
     else
     {
-        mpHost->mpConsole->print( msg, 0, 255, 0, 0, 0, 0 );
+        mpHost->mpConsole->print( msg, 150, 120, 0, 0, 0, 0 );
     }
 }
 
@@ -1122,13 +1148,13 @@ int cTelnet::decompressBuffer( char * dirtyBuffer, int length )
     int zval = inflate( & mZstream, Z_SYNC_FLUSH );
     int outSize = 100000 - mZstream.avail_out;
 
-    if (zval == Z_STREAM_END)
+    if( zval == Z_STREAM_END )
     {
         inflateEnd( & mZstream );
     }
     else
     {
-        if (zval < 0)
+        if( zval < 0 )
         {
             initStreamDecompressor();
             return -1;

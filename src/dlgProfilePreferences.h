@@ -87,6 +87,8 @@ public slots:
 
     void resetColors();
 
+    void downloadMap();
+
     void slot_save_and_exit();
 
 private:

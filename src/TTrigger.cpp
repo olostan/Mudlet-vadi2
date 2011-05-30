@@ -37,6 +37,7 @@
 #include <pcre.h>
 #include <sstream>
 #include <QSound>
+#include <phonon>
 
 using namespace std;
 
@@ -1449,7 +1450,9 @@ void TTrigger::execute()
 {
     if( mSoundTrigger )
     {
-        QSound::play( mSoundFile );
+        //QSound::play( mSoundFile );
+        Phonon::MediaObject * music = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource( mSoundFile ));
+        music->play();
     }
     if( mCommand.size() > 0 )
     {

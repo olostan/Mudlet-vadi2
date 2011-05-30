@@ -31,6 +31,8 @@
 #include "Host.h"
 #include "mudlet.h"
 #include "TTextEdit.h"
+#include "TMap.h"
+#include "dlgMapper.h"
 
 dlgProfilePreferences::dlgProfilePreferences( QWidget * pF, Host * pH )
 : QDialog( pF )
@@ -62,7 +64,7 @@ dlgProfilePreferences::dlgProfilePreferences( QWidget * pF, Host * pH )
         }
     }
 
-    connect(closeButton, SIGNAL(pressed()), this, SLOT(slot_save_and_exit()));
+    connect(closeButton, SIGNAL(clicked()), this, SLOT(slot_save_and_exit()));
     connect(pushButton_black, SIGNAL(clicked()), this, SLOT(setColorBlack()));
     QPalette palette;
     QString styleSheet;
@@ -370,6 +372,18 @@ dlgProfilePreferences::dlgProfilePreferences( QWidget * pF, Host * pH )
         encoding->setCurrentIndex( pHost->mEncoding );
         mFORCE_SAVE_ON_EXIT->setChecked( pHost->mFORCE_SAVE_ON_EXIT );
         mEnableGMCP->setChecked( pHost->mEnableGMCP );
+
+        if( !( pHost->mUrl == "achaea.com"
+            || pHost->mUrl == "aetolia.com"
+            || pHost->mUrl == "imperian.com"
+            || pHost->mUrl == "midkemiaonline.com"
+            || pHost->mUrl == "lusternia.com" ) )
+        {
+            ire_map_options->setHidden(true);
+        } else {
+            connect(redownload_ire_map, SIGNAL(clicked()), this, SLOT(downloadMap()));
+            no_mapper_warning->setHidden(true);
+        }
     }
 }
 
@@ -1222,7 +1236,19 @@ void dlgProfilePreferences::setColorLightWhite2()
     }
 }
 
+void dlgProfilePreferences::downloadMap()
+{
+    Host * pHost = mpHost;
+    if( ! pHost || !pHost->mpMap->mpMapper)
+    {
+        no_mapper_warning->setVisible(true);
+        return;
+    }
 
+    no_mapper_warning->setHidden(true);
+
+    pHost->mpMap->mpMapper->downloadMap();
+}
 
 void dlgProfilePreferences::slot_save_and_exit()
 {
@@ -1296,7 +1322,4 @@ void dlgProfilePreferences::slot_save_and_exit()
 
     close();
 }
-
-
-
 
