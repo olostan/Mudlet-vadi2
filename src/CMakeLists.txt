@@ -179,11 +179,10 @@ mudlet.h
     glwidget.h
     dlgMapper.h
     Tree.h
-<<<<<<< HEAD
     dlgRoomExits.h
     T2DMap.h
     dlgRoomExits.h
-	dlgIrc.h
+    dlgIrc.h
 )
 
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -215,6 +214,5 @@ TARGET_LINK_LIBRARIES(mudlet ${QT_LIBRARIES} ${LUA_LIBRARIES} ${ZLIB_LIBRARIES} 
 
 install( PROGRAMS mudlet DESTINATION "/usr/local/bin" )
 install( FILES LuaGlobal.lua mudlet_documentation.html fonts/ttf-bitstream-vera-1.10/COPYRIGHT.TXT fonts/ttf-bitstream-vera-1.10/local.conf fonts/ttf-bitstream-vera-1.10/README.TXT fonts/ttf-bitstream-vera-1.10/RELEASENOTES.TXT fonts/ttf-bitstream-vera-1.10/VeraBd.ttf fonts/ttf-bitstream-vera-1.10/VeraBI.ttf fonts/ttf-bitstream-vera-1.10/VeraIt.ttf fonts/ttf-bitstream-vera-1.10/VeraMoBd.ttf fonts/ttf-bitstream-vera-1.10/VeraMoBI.ttf fonts/ttf-bitstream-vera-1.10/VeraMoIt.ttf fonts/ttf-bitstream-vera-1.10/VeraMono.ttf fonts/ttf-bitstream-vera-1.10/VeraSeBd.ttf fonts/ttf-bitstream-vera-1.10/VeraSe.ttf fonts/ttf-bitstream-vera-1.10/Vera.ttf DESTINATION "/usr/local/share/mudlet" )
-
 
 
